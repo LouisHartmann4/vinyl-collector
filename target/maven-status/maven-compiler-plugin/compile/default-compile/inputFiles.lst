@@ -1,0 +1,10 @@
+C:\Users\louis.hartmann\IdeaProjects\Claude_Day\VinylCollector\src\main\java\org\example\vinyl\controller\DiscogsController.java
+C:\Users\louis.hartmann\IdeaProjects\Claude_Day\VinylCollector\src\main\java\org\example\vinyl\controller\VinylRecordController.java
+C:\Users\louis.hartmann\IdeaProjects\Claude_Day\VinylCollector\src\main\java\org\example\vinyl\discogs\DiscogsClient.java
+C:\Users\louis.hartmann\IdeaProjects\Claude_Day\VinylCollector\src\main\java\org\example\vinyl\discogs\DiscogsService.java
+C:\Users\louis.hartmann\IdeaProjects\Claude_Day\VinylCollector\src\main\java\org\example\vinyl\discogs\DiscogsUnavailableException.java
+C:\Users\louis.hartmann\IdeaProjects\Claude_Day\VinylCollector\src\main\java\org\example\vinyl\discogs\dto\DiscogsLookupResult.java
+C:\Users\louis.hartmann\IdeaProjects\Claude_Day\VinylCollector\src\main\java\org\example\vinyl\discogs\dto\DiscogsSearchResult.java
+C:\Users\louis.hartmann\IdeaProjects\Claude_Day\VinylCollector\src\main\java\org\example\vinyl\Main.java
+C:\Users\louis.hartmann\IdeaProjects\Claude_Day\VinylCollector\src\main\java\org\example\vinyl\model\VinylRecord.java
+C:\Users\louis.hartmann\IdeaProjects\Claude_Day\VinylCollector\src\main\java\org\example\vinyl\repository\VinylRecordRepository.java

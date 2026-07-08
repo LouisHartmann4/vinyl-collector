@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jps *)",
+      "PowerShell(Get-CimInstance *)",
+      "PowerShell(Stop-Process *)"
+    ]
+  }
+}

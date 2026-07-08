@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vinyl-Sammlung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+<div class="bg-decor" aria-hidden="true"></div>
+
+<div class="app">
+  <header class="hero">
+    <div class="hero-icon">💿</div>
+    <div>
+      <h1>Vinyl-Sammlung</h1>
+      <p class="subtitle">Behalte den Überblick über deine Schallplatten.</p>
+    </div>
+  </header>
+
+  <section class="stats" id="stats">
+    <div class="stat-card">
+      <span class="stat-value" id="stat-total">0</span>
+      <span class="stat-label">Platten gesamt</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="stat-artists">0</span>
+      <span class="stat-label">Interpreten</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="stat-genres">0</span>
+      <span class="stat-label">Genres</span>
+    </div>
+  </section>
+
+  <section class="card form-card">
+    <div class="add-options">
+      <button type="button" class="form-toggle" id="form-toggle">
+        <span class="plus">+</span> Platte hinzufügen
+      </button>
+      <button type="button" class="form-toggle scan-toggle" id="scan-toggle">
+        📷 Barcode scannen
+      </button>
+    </div>
+    <form id="record-form" hidden>
+      <input type="hidden" id="record-id">
+      <input type="hidden" id="barcode">
+      <div class="grid">
+        <label>
+          <span>Interpret</span>
+          <input type="text" id="artist" required placeholder="z. B. Pink Floyd">
+        </label>
+        <label>
+          <span>Titel</span>
+          <input type="text" id="title" required placeholder="z. B. The Dark Side of the Moon">
+        </label>
+        <label>
+          <span>Genre</span>
+          <select id="genre">
+            <option value="Rock">🎸 Rock</option>
+            <option value="Pop">🎤 Pop</option>
+            <option value="Jazz">🎷 Jazz</option>
+            <option value="Electronic">🎛️ Electronic</option>
+            <option value="Hip-Hop">🎧 Hip-Hop</option>
+            <option value="Klassik">🎻 Klassik</option>
+            <option value="Soul/Funk">🕺 Soul/Funk</option>
+            <option value="Sonstiges">💿 Sonstiges</option>
+          </select>
+        </label>
+        <label>
+          <span>Erscheinungsjahr</span>
+          <input type="number" id="releaseYear" min="1900" max="2100" step="1" placeholder="z. B. 1973">
+        </label>
+        <label>
+          <span>Format</span>
+          <select id="format">
+            <option value="LP">LP</option>
+            <option value="EP">EP</option>
+            <option value="Single/Maxi">Single/Maxi</option>
+            <option value="Box-Set">Box-Set</option>
+          </select>
+        </label>
+        <label>
+          <span>Zustand</span>
+          <select id="condition">
+            <option value="Mint (M)">Mint (M)</option>
+            <option value="Near Mint (NM)">Near Mint (NM)</option>
+            <option value="Sehr gut+ (VG+)">Sehr gut+ (VG+)</option>
+            <option value="Sehr gut (VG)">Sehr gut (VG)</option>
+            <option value="Gut (G)">Gut (G)</option>
+            <option value="Befriedigend (F)">Befriedigend (F)</option>
+          </select>
+        </label>
+        <label class="notes-field">
+          <span>Notizen</span>
+          <input type="text" id="notes" placeholder="z. B. limitierte Auflage, Kratzer auf Seite B">
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" id="submit-btn">Hinzufügen</button>
+        <button type="button" id="cancel-btn" class="secondary">Abbrechen</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="list-section">
+    <div class="list-header">
+      <h2>Sammlung</h2>
+      <div class="list-header-actions">
+        <button type="button" class="delete-all-btn" id="delete-all-btn">🗑️ Alle löschen</button>
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="search" id="search" placeholder="Suchen...">
+        </div>
+      </div>
+    </div>
+    <div id="records-grid" class="items-grid"></div>
+    <div id="empty-state" class="empty-state" hidden>
+      <div class="empty-icon">💿</div>
+      <p>Noch keine Platten in der Sammlung.</p>
+      <p class="empty-hint">Füge oben deine erste Platte hinzu.</p>
+    </div>
+  </section>
+</div>
+
+<div id="scan-modal" class="modal-overlay" hidden>
+  <div class="modal scan-modal">
+    <h3>Barcode scannen</h3>
+    <div id="scan-reader"></div>
+    <p id="scan-status" class="scan-status">Kamera wird gestartet…</p>
+    <div id="scan-results" class="scan-results" hidden></div>
+    <div class="modal-actions">
+      <button type="button" class="secondary" id="scan-cancel">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirm-modal" class="modal-overlay" hidden>
+  <div class="modal">
+    <p id="confirm-text">Diesen Eintrag löschen?</p>
+    <div class="modal-actions">
+      <button type="button" class="secondary" id="confirm-cancel">Abbrechen</button>
+      <button type="button" class="danger-btn" id="confirm-ok">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
