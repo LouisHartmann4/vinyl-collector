@@ -1,5 +1,3 @@
-const API = "/api/records";
-
 const GENRE_ICONS = {
   "Rock": "🎸",
   "Pop": "🎤",
@@ -22,6 +20,10 @@ const releaseYearField = document.getElementById("releaseYear");
 const formatField = document.getElementById("format");
 const conditionField = document.getElementById("condition");
 const notesField = document.getElementById("notes");
+const stylesField = document.getElementById("styles");
+const countryField = document.getElementById("country");
+const coverImageUrlField = document.getElementById("coverImageUrl");
+const tracklistField = document.getElementById("tracklist");
 const submitBtn = document.getElementById("submit-btn");
 const cancelBtn = document.getElementById("cancel-btn");
 const recordsGrid = document.getElementById("records-grid");
@@ -41,14 +43,135 @@ const scanModal = document.getElementById("scan-modal");
 const scanStatus = document.getElementById("scan-status");
 const scanResults = document.getElementById("scan-results");
 const scanCancel = document.getElementById("scan-cancel");
+const collectionsGrid = document.getElementById("collections-grid");
+const recordCollectionField = document.getElementById("record-collection");
+const noTargetCollectionHint = document.getElementById("no-target-collection-hint");
+const newCollectionBtn = document.getElementById("new-collection-btn");
+const collectionModal = document.getElementById("collection-modal");
+const collectionNameInput = document.getElementById("collection-name-input");
+const collectionCancel = document.getElementById("collection-cancel");
+const collectionCreate = document.getElementById("collection-create");
 
 let records = [];
+let collections = [];
+let currentCollectionId = localStorage.getItem("vinyl-current-collection-id");
 let confirmAction = null;
 let toastTimer = null;
 let html5QrCode = null;
 
+function recordsApiUrl() {
+  return `/api/collections/${currentCollectionId}/records`;
+}
+
+async function loadCollections() {
+  const res = await fetch("/api/collections");
+  collections = await res.json();
+
+  if (!collections.some(c => String(c.id) === String(currentCollectionId))) {
+    currentCollectionId = collections[0].id;
+  }
+  localStorage.setItem("vinyl-current-collection-id", currentCollectionId);
+
+  renderCollectionsGrid();
+  renderRecordCollectionOptions();
+  await loadRecords();
+}
+
+function renderCollectionsGrid() {
+  collectionsGrid.innerHTML = "";
+  collections.forEach(c => {
+    const card = document.createElement("div");
+    card.className = "item-card collection-card" + (String(c.id) === String(currentCollectionId) ? " active" : "");
+    card.innerHTML = `
+      <span class="item-name">${c.deletable ? "💿" : "📚"} ${escapeHtml(c.name)}</span>
+      <span class="item-expiry">${c.recordCount} ${c.recordCount === 1 ? "Platte" : "Platten"}</span>
+      ${c.deletable ? `<div class="item-actions"><button class="icon-btn delete" data-id="${c.id}" data-name="${escapeHtml(c.name)}" data-count="${c.recordCount}">Löschen</button></div>` : ""}
+    `;
+    card.addEventListener("click", e => {
+      if (e.target.closest("button")) return;
+      switchCollection(c.id);
+    });
+    collectionsGrid.appendChild(card);
+  });
+
+  collectionsGrid.querySelectorAll(".delete").forEach(btn =>
+    btn.addEventListener("click", () => requestDeleteCollection(btn.dataset.id, btn.dataset.name, btn.dataset.count))
+  );
+}
+
+function renderRecordCollectionOptions() {
+  const targetable = collections.filter(c => c.deletable);
+  recordCollectionField.innerHTML = "";
+  targetable.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.name;
+    recordCollectionField.appendChild(opt);
+  });
+
+  const canAdd = targetable.length > 0;
+  noTargetCollectionHint.hidden = canAdd;
+  formToggle.disabled = !canAdd;
+  scanToggle.disabled = !canAdd;
+
+  if (canAdd) {
+    const defaultId = targetable.some(c => String(c.id) === String(currentCollectionId))
+      ? currentCollectionId
+      : targetable[0].id;
+    recordCollectionField.value = defaultId;
+  }
+}
+
+async function switchCollection(id) {
+  currentCollectionId = id;
+  localStorage.setItem("vinyl-current-collection-id", currentCollectionId);
+  resetForm();
+  renderCollectionsGrid();
+  renderRecordCollectionOptions();
+  await loadRecords();
+}
+
+function openCollectionModal() {
+  collectionNameInput.value = "";
+  collectionModal.hidden = false;
+  collectionNameInput.focus();
+}
+
+function closeCollectionModal() {
+  collectionModal.hidden = true;
+}
+
+async function submitNewCollection() {
+  const name = collectionNameInput.value.trim();
+  if (!name) return;
+  const res = await fetch("/api/collections", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  const created = await res.json();
+  closeCollectionModal();
+  currentCollectionId = created.id;
+  localStorage.setItem("vinyl-current-collection-id", currentCollectionId);
+  await loadCollections();
+  showToast("Sammlung erstellt");
+}
+
+function requestDeleteCollection(id, name, count) {
+  confirmText.textContent = `Sammlung "${name}" wirklich löschen? Die ${count} enthaltenen Platten bleiben in "Alle Platten" erhalten.`;
+  confirmAction = async () => {
+    await fetch(`/api/collections/${id}`, { method: "DELETE" });
+    if (String(currentCollectionId) === String(id)) {
+      currentCollectionId = null;
+    }
+    await loadCollections();
+    showToast("Sammlung gelöscht");
+  };
+  confirmModal.hidden = false;
+}
+
 async function loadRecords() {
-  const res = await fetch(API);
+  const res = await fetch(recordsApiUrl());
   records = await res.json();
   renderRecords();
 }
@@ -79,12 +202,15 @@ function renderRecords() {
         .join(" · ");
 
       card.innerHTML = `
+        ${record.coverImageUrl ? `<img class="item-cover" src="${record.coverImageUrl}" alt="" loading="lazy">` : ""}
         <div class="item-top">
           <span class="item-name">${escapeHtml(record.title)}</span>
         </div>
         <span class="record-artist">${escapeHtml(record.artist)}</span>
         <span class="category-badge">${icon} ${escapeHtml(record.genre || "Sonstiges")}</span>
         <span class="item-expiry">${escapeHtml(meta) || "Keine weiteren Angaben"}</span>
+        ${record.styles ? `<span class="record-styles">${escapeHtml(record.styles)}</span>` : ""}
+        ${record.country ? `<span class="record-styles">${escapeHtml(record.country)}</span>` : ""}
         ${record.notes ? `<span class="record-notes">${escapeHtml(record.notes)}</span>` : ""}
         <div class="item-actions">
           <button class="icon-btn edit" data-id="${record.id}">Bearbeiten</button>
@@ -111,6 +237,7 @@ function escapeHtml(str) {
 function openForm() {
   form.hidden = false;
   formToggle.classList.add("open");
+  renderRecordCollectionOptions();
 }
 
 function startEdit(id) {
@@ -118,6 +245,7 @@ function startEdit(id) {
   if (!record) return;
   openForm();
   idField.value = record.id;
+  recordCollectionField.value = record.collectionId;
   barcodeField.value = record.barcode || "";
   artistField.value = record.artist;
   titleField.value = record.title;
@@ -126,6 +254,10 @@ function startEdit(id) {
   formatField.value = record.format;
   conditionField.value = record.condition;
   notesField.value = record.notes || "";
+  stylesField.value = record.styles || "";
+  countryField.value = record.country || "";
+  coverImageUrlField.value = record.coverImageUrl || "";
+  tracklistField.value = record.tracklist || "";
   submitBtn.textContent = "Speichern";
   artistField.focus();
 }
@@ -142,7 +274,7 @@ function resetForm() {
 function requestDelete(id) {
   confirmText.textContent = "Diesen Eintrag löschen?";
   confirmAction = async () => {
-    await fetch(`${API}/${id}`, { method: "DELETE" });
+    await fetch(`${recordsApiUrl()}/${id}`, { method: "DELETE" });
     await loadRecords();
     showToast("Platte gelöscht");
   };
@@ -150,11 +282,15 @@ function requestDelete(id) {
 }
 
 function requestDeleteAll() {
-  confirmText.textContent = "Wirklich die gesamte Sammlung löschen? Das kann nicht rückgängig gemacht werden.";
+  const current = collections.find(c => String(c.id) === String(currentCollectionId));
+  const isGeneral = current && !current.deletable;
+  confirmText.textContent = isGeneral
+    ? "Wirklich ALLE Platten aus jeder Sammlung unwiderruflich löschen?"
+    : "Wirklich alle Platten aus dieser Sammlung entfernen? Sie bleiben in \"Alle Platten\" erhalten.";
   confirmAction = async () => {
-    await fetch(API, { method: "DELETE" });
-    await loadRecords();
-    showToast("Sammlung geleert");
+    await fetch(recordsApiUrl(), { method: "DELETE" });
+    await loadCollections();
+    showToast(isGeneral ? "Alle Platten gelöscht" : "Sammlung geleert");
   };
   confirmModal.hidden = false;
 }
@@ -293,6 +429,10 @@ async function applyRelease(releaseId, code) {
     genreField.value = matchOption(genreField, release.genre);
     releaseYearField.value = release.releaseYear || "";
     formatField.value = matchOption(formatField, release.format);
+    stylesField.value = release.styles || "";
+    countryField.value = release.country || "";
+    coverImageUrlField.value = release.coverImageUrl || "";
+    tracklistField.value = release.tracklist || "";
     showToast("Daten von Discogs geladen – bitte prüfen und ergänzen");
     artistField.focus();
   } catch (err) {
@@ -302,6 +442,19 @@ async function applyRelease(releaseId, code) {
     showToast("Discogs-Daten konnten nicht geladen werden – bitte manuell eingeben");
   }
 }
+
+newCollectionBtn.addEventListener("click", openCollectionModal);
+collectionCancel.addEventListener("click", closeCollectionModal);
+collectionCreate.addEventListener("click", submitNewCollection);
+collectionModal.addEventListener("click", e => {
+  if (e.target === collectionModal) closeCollectionModal();
+});
+collectionNameInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    submitNewCollection();
+  }
+});
 
 scanToggle.addEventListener("click", openScanModal);
 scanCancel.addEventListener("click", closeScanModal);
@@ -338,10 +491,16 @@ form.addEventListener("submit", async e => {
     condition: conditionField.value,
     notes: notesField.value.trim() || null,
     barcode: barcodeField.value.trim() || null,
+    styles: stylesField.value.trim() || null,
+    country: countryField.value.trim() || null,
+    coverImageUrl: coverImageUrlField.value.trim() || null,
+    tracklist: tracklistField.value.trim() || null,
   };
 
   const id = idField.value;
-  const url = id ? `${API}/${id}` : API;
+  const targetCollectionId = recordCollectionField.value;
+  const targetApiUrl = `/api/collections/${targetCollectionId}/records`;
+  const url = id ? `${targetApiUrl}/${id}` : targetApiUrl;
   const method = id ? "PUT" : "POST";
 
   await fetch(url, {
@@ -352,11 +511,13 @@ form.addEventListener("submit", async e => {
 
   const wasEdit = !!id;
   resetForm();
-  await loadRecords();
+  currentCollectionId = targetCollectionId;
+  localStorage.setItem("vinyl-current-collection-id", currentCollectionId);
+  await loadCollections();
   showToast(wasEdit ? "Platte aktualisiert" : "Platte hinzugefügt");
 });
 
 cancelBtn.addEventListener("click", resetForm);
 searchField.addEventListener("input", renderRecords);
 
-loadRecords();
+loadCollections();

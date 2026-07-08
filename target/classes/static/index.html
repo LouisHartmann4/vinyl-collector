@@ -22,6 +22,14 @@
     </div>
   </header>
 
+  <section class="list-section">
+    <div class="list-header">
+      <h2>Sammlungen</h2>
+      <button type="button" class="icon-btn" id="new-collection-btn">+ Neue Sammlung</button>
+    </div>
+    <div id="collections-grid" class="items-grid"></div>
+  </section>
+
   <section class="stats" id="stats">
     <div class="stat-card">
       <span class="stat-value" id="stat-total">0</span>
@@ -46,10 +54,15 @@
         📷 Barcode scannen
       </button>
     </div>
+    <p id="no-target-collection-hint" class="scan-status" hidden>Lege zuerst eine Sammlung an, um Platten hinzuzufügen.</p>
     <form id="record-form" hidden>
       <input type="hidden" id="record-id">
       <input type="hidden" id="barcode">
       <div class="grid">
+        <label>
+          <span>Sammlung</span>
+          <select id="record-collection" required></select>
+        </label>
         <label>
           <span>Interpret</span>
           <input type="text" id="artist" required placeholder="z. B. Pink Floyd">
@@ -95,9 +108,25 @@
             <option value="Befriedigend (F)">Befriedigend (F)</option>
           </select>
         </label>
+        <label>
+          <span>Styles</span>
+          <input type="text" id="styles" placeholder="z. B. Prog Rock, Psychedelic Rock">
+        </label>
+        <label>
+          <span>Land</span>
+          <input type="text" id="country" placeholder="z. B. UK">
+        </label>
+        <label>
+          <span>Cover-Bild-URL</span>
+          <input type="url" id="coverImageUrl" placeholder="https://...">
+        </label>
         <label class="notes-field">
           <span>Notizen</span>
           <input type="text" id="notes" placeholder="z. B. limitierte Auflage, Kratzer auf Seite B">
+        </label>
+        <label class="notes-field">
+          <span>Tracklist</span>
+          <textarea id="tracklist" rows="4" placeholder="z. B.&#10;A1 Speak to Me (1:30)&#10;A2 Breathe (2:43)"></textarea>
         </label>
       </div>
       <div class="actions">
@@ -137,6 +166,17 @@
     <div id="scan-results" class="scan-results" hidden></div>
     <div class="modal-actions">
       <button type="button" class="secondary" id="scan-cancel">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<div id="collection-modal" class="modal-overlay" hidden>
+  <div class="modal">
+    <p>Name der neuen Sammlung</p>
+    <input type="text" id="collection-name-input" placeholder="z. B. Jazz-Ecke" style="width: 100%; margin-bottom: 18px;">
+    <div class="modal-actions">
+      <button type="button" class="secondary" id="collection-cancel">Abbrechen</button>
+      <button type="button" id="collection-create">Erstellen</button>
     </div>
   </div>
 </div>

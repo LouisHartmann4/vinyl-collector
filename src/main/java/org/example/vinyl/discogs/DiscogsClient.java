@@ -77,7 +77,35 @@ public class DiscogsClient {
 
         Integer year = response.year() == null || response.year() == 0 ? null : response.year();
 
-        return new DiscogsLookupResult(artist, response.title(), genre, year, format);
+        String styles = response.styles() == null || response.styles().isEmpty() ? null : String.join(", ", response.styles());
+
+        String tracklist = response.tracklist() == null ? null : response.tracklist().stream()
+                .map(DiscogsClient::formatTrack)
+                .filter(t -> !t.isBlank())
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse(null);
+
+        String coverImageUrl = response.images() == null ? null : response.images().stream()
+                .filter(img -> "primary".equals(img.type()))
+                .findFirst()
+                .or(() -> response.images().stream().findFirst())
+                .map(ImageRaw::uri)
+                .orElse(null);
+
+        return new DiscogsLookupResult(artist, response.title(), genre, year, format,
+                styles, response.country(), tracklist, coverImageUrl);
+    }
+
+    private static String formatTrack(TrackRaw track) {
+        StringBuilder sb = new StringBuilder();
+        if (track.position() != null && !track.position().isBlank()) {
+            sb.append(track.position()).append(" ");
+        }
+        sb.append(track.title() == null ? "" : track.title());
+        if (track.duration() != null && !track.duration().isBlank()) {
+            sb.append(" (").append(track.duration()).append(")");
+        }
+        return sb.toString().trim();
     }
 
     private static Integer parseYear(String year) {
@@ -102,7 +130,9 @@ public class DiscogsClient {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record ReleaseResponse(String title, List<ArtistRaw> artists, Integer year,
-                                    List<String> genres, List<FormatRaw> formats) {
+                                    List<String> genres, List<String> styles, String country,
+                                    List<FormatRaw> formats, List<TrackRaw> tracklist,
+                                    List<ImageRaw> images) {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -111,5 +141,13 @@ public class DiscogsClient {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record FormatRaw(String name) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record TrackRaw(String position, String title, String duration) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record ImageRaw(String type, String uri) {
     }
 }

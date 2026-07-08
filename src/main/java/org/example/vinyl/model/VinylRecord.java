@@ -1,9 +1,18 @@
 package org.example.vinyl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToMany;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class VinylRecord {
@@ -20,6 +29,18 @@ public class VinylRecord {
     private String condition;
     private String notes;
     private String barcode;
+    private String styles;
+    private String country;
+    @Lob
+    private String tracklist;
+    private String coverImageUrl;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "record_collection",
+            joinColumns = @JoinColumn(name = "record_id"),
+            inverseJoinColumns = @JoinColumn(name = "collection_id"))
+    @JsonIgnore
+    private Set<VinylCollection> collections = new HashSet<>();
 
     public VinylRecord() {
     }
@@ -94,5 +115,49 @@ public class VinylRecord {
 
     public void setBarcode(String barcode) {
         this.barcode = barcode;
+    }
+
+    public String getStyles() {
+        return styles;
+    }
+
+    public void setStyles(String styles) {
+        this.styles = styles;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getTracklist() {
+        return tracklist;
+    }
+
+    public void setTracklist(String tracklist) {
+        this.tracklist = tracklist;
+    }
+
+    public String getCoverImageUrl() {
+        return coverImageUrl;
+    }
+
+    public void setCoverImageUrl(String coverImageUrl) {
+        this.coverImageUrl = coverImageUrl;
+    }
+
+    public Set<VinylCollection> getCollections() {
+        return collections;
+    }
+
+    public Long getCollectionId() {
+        return collections.stream()
+                .filter(c -> !c.isGeneral())
+                .map(VinylCollection::getId)
+                .findFirst()
+                .orElse(null);
     }
 }
