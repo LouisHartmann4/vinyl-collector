@@ -1,5 +1,8 @@
 package org.example.vinyl.controller;
 
+import org.example.vinyl.discogs.DiscogsService;
+import org.example.vinyl.discogs.DiscogsUnavailableException;
+import org.example.vinyl.discogs.dto.DiscogsMarketStats;
 import org.example.vinyl.model.VinylCollection;
 import org.example.vinyl.model.VinylRecord;
 import org.example.vinyl.repository.VinylCollectionRepository;
@@ -17,10 +20,13 @@ public class VinylRecordController {
 
     private final VinylRecordRepository repository;
     private final VinylCollectionRepository collectionRepository;
+    private final DiscogsService discogsService;
 
-    public VinylRecordController(VinylRecordRepository repository, VinylCollectionRepository collectionRepository) {
+    public VinylRecordController(VinylRecordRepository repository, VinylCollectionRepository collectionRepository,
+                                  DiscogsService discogsService) {
         this.repository = repository;
         this.collectionRepository = collectionRepository;
+        this.discogsService = discogsService;
     }
 
     @GetMapping
@@ -33,6 +39,7 @@ public class VinylRecordController {
         record.setId(null);
         record.getCollections().clear();
         record.getCollections().addAll(targetCollections(collectionId));
+        fetchLatestPrice(record);
         return repository.save(record);
     }
 
@@ -41,7 +48,23 @@ public class VinylRecordController {
         record.setId(id);
         record.getCollections().clear();
         record.getCollections().addAll(targetCollections(collectionId));
+        fetchLatestPrice(record);
         return repository.save(record);
+    }
+
+    private void fetchLatestPrice(VinylRecord record) {
+        if (record.getDiscogsReleaseId() == null) {
+            return;
+        }
+        try {
+            DiscogsMarketStats stats = discogsService.getMarketStats(record.getDiscogsReleaseId());
+            if (stats != null && stats.lowestPrice() != null) {
+                record.setLastKnownPrice(stats.lowestPrice());
+                record.setLastKnownPriceCurrency(stats.currency());
+            }
+        } catch (DiscogsUnavailableException e) {
+            // Preis bleibt unbekannt, Speichern wird dadurch nicht blockiert
+        }
     }
 
     @DeleteMapping("/{id}")

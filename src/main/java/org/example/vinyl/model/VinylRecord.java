@@ -34,6 +34,11 @@ public class VinylRecord {
     @Lob
     private String tracklist;
     private String coverImageUrl;
+    private Long discogsReleaseId;
+    private String label;
+    private String catalogNumber;
+    private Double lastKnownPrice;
+    private String lastKnownPriceCurrency;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "record_collection",
@@ -147,6 +152,46 @@ public class VinylRecord {
 
     public void setCoverImageUrl(String coverImageUrl) {
         this.coverImageUrl = coverImageUrl;
+    }
+
+    public Long getDiscogsReleaseId() {
+        return discogsReleaseId;
+    }
+
+    public void setDiscogsReleaseId(Long discogsReleaseId) {
+        this.discogsReleaseId = discogsReleaseId;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getCatalogNumber() {
+        return catalogNumber;
+    }
+
+    public void setCatalogNumber(String catalogNumber) {
+        this.catalogNumber = catalogNumber;
+    }
+
+    public Double getLastKnownPrice() {
+        return lastKnownPrice;
+    }
+
+    public void setLastKnownPrice(Double lastKnownPrice) {
+        this.lastKnownPrice = lastKnownPrice;
+    }
+
+    public String getLastKnownPriceCurrency() {
+        return lastKnownPriceCurrency;
+    }
+
+    public void setLastKnownPriceCurrency(String lastKnownPriceCurrency) {
+        this.lastKnownPriceCurrency = lastKnownPriceCurrency;
     }
 
     public Set<VinylCollection> getCollections() {

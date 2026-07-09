@@ -13,6 +13,15 @@
 <body>
 <div class="bg-decor" aria-hidden="true"></div>
 
+<div class="page-layout">
+<aside class="side-panel" id="wishlist-panel">
+  <div class="side-panel-header">
+    <h3>Wunschliste</h3>
+    <button type="button" class="icon-btn" id="wishlist-search-btn" aria-label="Von Discogs hinzufügen">+</button>
+  </div>
+  <div id="wishlist-list" class="wishlist-list"></div>
+  <p id="wishlist-empty-state" class="overview-empty" hidden>Noch keine Wunsch-Platten.</p>
+</aside>
 <div class="app">
   <header class="hero">
     <div class="hero-icon">💿</div>
@@ -58,6 +67,7 @@
     <form id="record-form" hidden>
       <input type="hidden" id="record-id">
       <input type="hidden" id="barcode">
+      <input type="hidden" id="discogs-release-id">
       <div class="grid">
         <label>
           <span>Sammlung</span>
@@ -117,6 +127,14 @@
           <input type="text" id="country" placeholder="z. B. UK">
         </label>
         <label>
+          <span>Label</span>
+          <input type="text" id="label" placeholder="z. B. DGC">
+        </label>
+        <label>
+          <span>Katalognummer</span>
+          <input type="text" id="catalogNumber" placeholder="z. B. 424 425-1">
+        </label>
+        <label>
           <span>Cover-Bild-URL</span>
           <input type="url" id="coverImageUrl" placeholder="https://...">
         </label>
@@ -141,13 +159,71 @@
       <h2>Sammlung</h2>
       <div class="list-header-actions">
         <button type="button" class="delete-all-btn" id="delete-all-btn">🗑️ Alle löschen</button>
+        <button type="button" class="filter-toggle-btn" id="filter-toggle-btn" aria-label="Filter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="3 4 21 4 14 12.5 14 19 10 21 10 12.5 3 4"/>
+          </svg>
+        </button>
         <div class="search-wrap">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <input type="search" id="search" placeholder="Suchen...">
+          <input type="search" id="search" placeholder="Alles durchsuchen...">
         </div>
       </div>
+    </div>
+    <div class="filter-panel" id="filter-panel" hidden>
+      <div class="filter-grid">
+        <label>
+          <span>Genre</span>
+          <select id="filter-genre">
+            <option value="">Alle</option>
+            <option value="Rock">Rock</option>
+            <option value="Pop">Pop</option>
+            <option value="Jazz">Jazz</option>
+            <option value="Electronic">Electronic</option>
+            <option value="Hip-Hop">Hip-Hop</option>
+            <option value="Klassik">Klassik</option>
+            <option value="Soul/Funk">Soul/Funk</option>
+            <option value="Sonstiges">Sonstiges</option>
+          </select>
+        </label>
+        <label>
+          <span>Format</span>
+          <select id="filter-format">
+            <option value="">Alle</option>
+            <option value="LP">LP</option>
+            <option value="EP">EP</option>
+            <option value="Single/Maxi">Single/Maxi</option>
+            <option value="Box-Set">Box-Set</option>
+          </select>
+        </label>
+        <label>
+          <span>Zustand</span>
+          <select id="filter-condition">
+            <option value="">Alle</option>
+            <option value="Mint (M)">Mint (M)</option>
+            <option value="Near Mint (NM)">Near Mint (NM)</option>
+            <option value="Sehr gut+ (VG+)">Sehr gut+ (VG+)</option>
+            <option value="Sehr gut (VG)">Sehr gut (VG)</option>
+            <option value="Gut (G)">Gut (G)</option>
+            <option value="Befriedigend (F)">Befriedigend (F)</option>
+          </select>
+        </label>
+        <label>
+          <span>Land</span>
+          <input type="text" id="filter-country" placeholder="z. B. UK">
+        </label>
+        <label>
+          <span>Jahr von</span>
+          <input type="number" id="filter-year-from" placeholder="z. B. 1970">
+        </label>
+        <label>
+          <span>Jahr bis</span>
+          <input type="number" id="filter-year-to" placeholder="z. B. 1990">
+        </label>
+      </div>
+      <button type="button" class="secondary filter-reset-btn" id="filter-reset-btn">Filter zurücksetzen</button>
     </div>
     <div id="records-grid" class="items-grid"></div>
     <div id="empty-state" class="empty-state" hidden>
@@ -157,6 +233,8 @@
     </div>
   </section>
 </div>
+<aside class="side-panel" id="collection-overview"></aside>
+</div>
 
 <div id="scan-modal" class="modal-overlay" hidden>
   <div class="modal scan-modal">
@@ -164,8 +242,28 @@
     <div id="scan-reader"></div>
     <p id="scan-status" class="scan-status">Kamera wird gestartet…</p>
     <div id="scan-results" class="scan-results" hidden></div>
+    <button type="button" class="secondary manual-entry-btn" id="manual-entry-btn" hidden>Barcode manuell eingeben</button>
+    <div id="manual-entry-form" class="manual-entry-form" hidden>
+      <input type="text" id="manual-barcode-input" placeholder="Barcode eingeben">
+      <button type="button" id="manual-entry-submit">Suchen</button>
+    </div>
     <div class="modal-actions">
       <button type="button" class="secondary" id="scan-cancel">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<div id="wishlist-search-modal" class="modal-overlay" hidden>
+  <div class="modal scan-modal">
+    <h3>Von Discogs hinzufügen</h3>
+    <div class="manual-entry-form">
+      <input type="text" id="wishlist-search-input" placeholder="Interpret, Titel, ...">
+      <button type="button" id="wishlist-search-submit">Suchen</button>
+    </div>
+    <p id="wishlist-search-status" class="scan-status" hidden></p>
+    <div id="wishlist-search-results" class="scan-results" hidden></div>
+    <div class="modal-actions">
+      <button type="button" class="secondary" id="wishlist-search-cancel">Abbrechen</button>
     </div>
   </div>
 </div>
@@ -178,6 +276,13 @@
       <button type="button" class="secondary" id="collection-cancel">Abbrechen</button>
       <button type="button" id="collection-create">Erstellen</button>
     </div>
+  </div>
+</div>
+
+<div id="detail-modal" class="modal-overlay" hidden>
+  <div class="modal detail-modal">
+    <button type="button" class="detail-close" id="detail-close" aria-label="Schließen">✕</button>
+    <div id="detail-content"></div>
   </div>
 </div>
 

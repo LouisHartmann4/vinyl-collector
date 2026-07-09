@@ -12,4 +12,6 @@ public interface VinylRecordRepository extends JpaRepository<VinylRecord, Long> 
     List<VinylRecord> findByCollectionsIsEmpty();
 
     long countByCollectionsId(Long collectionId);
+
+    List<VinylRecord> findByDiscogsReleaseIdIsNotNullAndLastKnownPriceIsNull();
 }
