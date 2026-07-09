@@ -54,6 +54,7 @@ const confirmCancel = document.getElementById("confirm-cancel");
 const deleteAllBtn = document.getElementById("delete-all-btn");
 const toastEl = document.getElementById("toast");
 const scanToggle = document.getElementById("scan-toggle");
+const scanToggleCollection = document.getElementById("scan-toggle-collection");
 const scanModal = document.getElementById("scan-modal");
 const scanStatus = document.getElementById("scan-status");
 const scanResults = document.getElementById("scan-results");
@@ -236,6 +237,7 @@ function renderRecordCollectionOptions() {
   const canAdd = targetable.length > 0;
   noTargetCollectionHint.hidden = canAdd;
   scanToggle.disabled = !canAdd;
+  scanToggleCollection.disabled = !canAdd;
 
   if (canAdd) {
     const defaultId = targetable.some(c => String(c.id) === String(currentCollectionId))
@@ -936,6 +938,7 @@ collectionNameInput.addEventListener("keydown", e => {
 });
 
 scanToggle.addEventListener("click", openScanModal);
+scanToggleCollection.addEventListener("click", openScanModal);
 scanCancel.addEventListener("click", closeScanModal);
 scanModal.addEventListener("click", e => {
   if (e.target === scanModal) closeScanModal();
