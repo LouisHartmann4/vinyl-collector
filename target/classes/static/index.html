@@ -3,72 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vinyl-Sammlung</title>
+<meta name="theme-color" content="#0B0B0A">
+<title>Vinyl Collector</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
-<div class="bg-decor" aria-hidden="true"></div>
+<div class="wrap">
 
-<div class="page-layout">
-<aside class="side-panel" id="wishlist-panel">
-  <div class="side-panel-header">
-    <h3>Wunschliste</h3>
-    <button type="button" class="icon-btn" id="wishlist-search-btn" aria-label="Von Discogs hinzufügen">+</button>
-  </div>
-  <div id="wishlist-list" class="wishlist-list"></div>
-  <p id="wishlist-empty-state" class="overview-empty" hidden>Noch keine Wunsch-Platten.</p>
-</aside>
-<div class="app">
-  <header class="hero">
-    <div class="hero-icon">💿</div>
+  <header>
+    <div class="logo"></div>
     <div>
-      <h1>Vinyl-Sammlung</h1>
-      <p class="subtitle">Behalte den Überblick über deine Schallplatten.</p>
+      <h1>Vinyl Collector</h1>
+      <p id="hero-subtitle">Lädt…</p>
     </div>
   </header>
 
-  <section class="list-section">
-    <div class="list-header">
+  <div id="dashboard-view">
+
+    <div class="stats">
+      <div class="stat"><div class="num" id="dash-stat-total">0</div><div class="label">Platten gesamt</div></div>
+      <div class="stat"><div class="num" id="dash-stat-artists">0</div><div class="label">Interpreten</div></div>
+      <div class="stat"><div class="num" id="dash-stat-country">–</div><div class="label">Häufigstes Land</div></div>
+      <div class="stat hi"><div class="num" id="dash-stat-value">–</div><div class="label">Gesamtwert</div></div>
+    </div>
+
+    <div class="section-head">
       <h2>Sammlungen</h2>
-      <button type="button" class="icon-btn" id="new-collection-btn">+ Neue Sammlung</button>
+      <a href="#" id="new-collection-btn">+ Neue Sammlung</a>
     </div>
-    <div id="collections-grid" class="items-grid"></div>
-  </section>
+    <div id="collections-grid" class="grid"></div>
 
-  <section class="stats" id="stats">
-    <div class="stat-card">
-      <span class="stat-value" id="stat-total">0</span>
-      <span class="stat-label">Platten gesamt</span>
+    <div class="section-head">
+      <h2>Wunschliste</h2>
+      <a href="#" id="wishlist-search-btn">+ Manuell hinzufügen</a>
     </div>
-    <div class="stat-card">
-      <span class="stat-value" id="stat-artists">0</span>
-      <span class="stat-label">Interpreten</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-value" id="stat-genres">0</span>
-      <span class="stat-label">Genres</span>
-    </div>
-  </section>
+    <div id="wishlist-list" class="wish-grid"></div>
+    <p id="wishlist-empty-state" class="empty-note" hidden>Noch keine Wunsch-Platten.</p>
 
-  <section class="card form-card">
-    <div class="add-options">
-      <button type="button" class="form-toggle" id="form-toggle">
-        <span class="plus">+</span> Platte hinzufügen
-      </button>
-      <button type="button" class="form-toggle scan-toggle" id="scan-toggle">
-        📷 Barcode scannen
-      </button>
+    <div class="section-head"><h2>Platte erfassen</h2></div>
+    <div class="add-flow">
+      <div class="add-card">
+        <div class="icon">◎</div>
+        <h4>Barcode scannen</h4>
+        <p>Kamera öffnen, Barcode ins Bild halten – Discogs-Treffer wird automatisch geladen.</p>
+        <button type="button" class="add-card-trigger" id="scan-toggle">Kamera starten →</button>
+      </div>
+      <div class="add-card">
+        <div class="icon">Aa</div>
+        <h4>Manuell suchen</h4>
+        <p>Titel oder Interpret eingeben, Treffer aus Discogs übernehmen.</p>
+        <input type="text" id="manual-search-input" placeholder="z. B. Dream Theater – Awake">
+        <p id="manual-search-status" class="add-card-status" hidden></p>
+        <div id="manual-search-results"></div>
+        <a href="#" id="manual-form-link" class="tiny-link">…oder komplett manuell erfassen</a>
+      </div>
     </div>
-    <p id="no-target-collection-hint" class="scan-status" hidden>Lege zuerst eine Sammlung an, um Platten hinzuzufügen.</p>
+
+  </div>
+
+  <div id="collection-view" hidden>
+
+    <div class="collection-head">
+      <a href="#" class="back" id="back-to-dashboard">← Zurück</a>
+      <h2 id="collection-title">Sammlung</h2>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num" id="coll-stat-total">0</div><div class="label">Platten</div></div>
+      <div class="stat"><div class="num" id="coll-stat-artists">0</div><div class="label">Interpreten</div></div>
+      <div class="stat"><div class="num" id="coll-stat-country">–</div><div class="label">Häufigstes Land</div></div>
+      <div class="stat hi"><div class="num" id="coll-stat-value">–</div><div class="label">Gesamtwert</div></div>
+    </div>
+
+    <div class="toolbar">
+      <button type="button" id="add-record-btn">+ Platte hinzufügen</button>
+      <button type="button" class="filter-toggle-btn" id="filter-toggle-btn" aria-label="Filter">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+      </button>
+      <div class="search-wrap">
+        <input type="search" id="search" placeholder="Alles durchsuchen...">
+      </div>
+      <button type="button" class="delete-all-btn" id="delete-all-btn">Alle löschen</button>
+    </div>
+
+    <div class="filter-panel" id="filter-panel" hidden>
+      <div class="filter-grid">
+        <label>
+          <span>Genre</span>
+          <select id="filter-genre">
+            <option value="">Alle</option>
+            <option value="Rock">Rock</option>
+            <option value="Pop">Pop</option>
+            <option value="Jazz">Jazz</option>
+            <option value="Electronic">Electronic</option>
+            <option value="Hip-Hop">Hip-Hop</option>
+            <option value="Klassik">Klassik</option>
+            <option value="Soul/Funk">Soul/Funk</option>
+            <option value="Sonstiges">Sonstiges</option>
+          </select>
+        </label>
+        <label>
+          <span>Format</span>
+          <select id="filter-format">
+            <option value="">Alle</option>
+            <option value="LP">LP</option>
+            <option value="EP">EP</option>
+            <option value="Single/Maxi">Single/Maxi</option>
+            <option value="Box-Set">Box-Set</option>
+          </select>
+        </label>
+        <label>
+          <span>Zustand</span>
+          <select id="filter-condition">
+            <option value="">Alle</option>
+            <option value="Mint (M)">Mint (M)</option>
+            <option value="Near Mint (NM)">Near Mint (NM)</option>
+            <option value="Sehr gut+ (VG+)">Sehr gut+ (VG+)</option>
+            <option value="Sehr gut (VG)">Sehr gut (VG)</option>
+            <option value="Gut (G)">Gut (G)</option>
+            <option value="Befriedigend (F)">Befriedigend (F)</option>
+          </select>
+        </label>
+        <label>
+          <span>Land</span>
+          <input type="text" id="filter-country" placeholder="z. B. UK">
+        </label>
+        <label>
+          <span>Jahr von</span>
+          <input type="number" id="filter-year-from" placeholder="z. B. 1970">
+        </label>
+        <label>
+          <span>Jahr bis</span>
+          <input type="number" id="filter-year-to" placeholder="z. B. 1990">
+        </label>
+      </div>
+      <button type="button" class="secondary filter-reset-btn" id="filter-reset-btn">Filter zurücksetzen</button>
+    </div>
+
+    <div id="records-grid" class="rec-grid"></div>
+    <p id="empty-state" class="empty-note" hidden>Noch keine Platten in dieser Sammlung.</p>
+
+  </div>
+
+  <section class="card form-card" id="form-card" hidden>
     <form id="record-form" hidden>
       <input type="hidden" id="record-id">
       <input type="hidden" id="barcode">
       <input type="hidden" id="discogs-release-id">
-      <div class="grid">
+      <h4>Platte erfassen</h4>
+      <div class="form-grid">
         <label>
           <span>Sammlung</span>
           <select id="record-collection" required></select>
@@ -84,14 +171,14 @@
         <label>
           <span>Genre</span>
           <select id="genre">
-            <option value="Rock">🎸 Rock</option>
-            <option value="Pop">🎤 Pop</option>
-            <option value="Jazz">🎷 Jazz</option>
-            <option value="Electronic">🎛️ Electronic</option>
-            <option value="Hip-Hop">🎧 Hip-Hop</option>
-            <option value="Klassik">🎻 Klassik</option>
-            <option value="Soul/Funk">🕺 Soul/Funk</option>
-            <option value="Sonstiges">💿 Sonstiges</option>
+            <option value="Rock">Rock</option>
+            <option value="Pop">Pop</option>
+            <option value="Jazz">Jazz</option>
+            <option value="Electronic">Electronic</option>
+            <option value="Hip-Hop">Hip-Hop</option>
+            <option value="Klassik">Klassik</option>
+            <option value="Soul/Funk">Soul/Funk</option>
+            <option value="Sonstiges">Sonstiges</option>
           </select>
         </label>
         <label>
@@ -152,88 +239,9 @@
         <button type="button" id="cancel-btn" class="secondary">Abbrechen</button>
       </div>
     </form>
+    <p id="no-target-collection-hint" class="add-card-status" hidden>Lege zuerst eine Sammlung an, um Platten hinzuzufügen.</p>
   </section>
 
-  <section class="list-section">
-    <div class="list-header">
-      <h2>Sammlung</h2>
-      <div class="list-header-actions">
-        <button type="button" class="delete-all-btn" id="delete-all-btn">🗑️ Alle löschen</button>
-        <button type="button" class="filter-toggle-btn" id="filter-toggle-btn" aria-label="Filter">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="3 4 21 4 14 12.5 14 19 10 21 10 12.5 3 4"/>
-          </svg>
-        </button>
-        <div class="search-wrap">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input type="search" id="search" placeholder="Alles durchsuchen...">
-        </div>
-      </div>
-    </div>
-    <div class="filter-panel" id="filter-panel" hidden>
-      <div class="filter-grid">
-        <label>
-          <span>Genre</span>
-          <select id="filter-genre">
-            <option value="">Alle</option>
-            <option value="Rock">Rock</option>
-            <option value="Pop">Pop</option>
-            <option value="Jazz">Jazz</option>
-            <option value="Electronic">Electronic</option>
-            <option value="Hip-Hop">Hip-Hop</option>
-            <option value="Klassik">Klassik</option>
-            <option value="Soul/Funk">Soul/Funk</option>
-            <option value="Sonstiges">Sonstiges</option>
-          </select>
-        </label>
-        <label>
-          <span>Format</span>
-          <select id="filter-format">
-            <option value="">Alle</option>
-            <option value="LP">LP</option>
-            <option value="EP">EP</option>
-            <option value="Single/Maxi">Single/Maxi</option>
-            <option value="Box-Set">Box-Set</option>
-          </select>
-        </label>
-        <label>
-          <span>Zustand</span>
-          <select id="filter-condition">
-            <option value="">Alle</option>
-            <option value="Mint (M)">Mint (M)</option>
-            <option value="Near Mint (NM)">Near Mint (NM)</option>
-            <option value="Sehr gut+ (VG+)">Sehr gut+ (VG+)</option>
-            <option value="Sehr gut (VG)">Sehr gut (VG)</option>
-            <option value="Gut (G)">Gut (G)</option>
-            <option value="Befriedigend (F)">Befriedigend (F)</option>
-          </select>
-        </label>
-        <label>
-          <span>Land</span>
-          <input type="text" id="filter-country" placeholder="z. B. UK">
-        </label>
-        <label>
-          <span>Jahr von</span>
-          <input type="number" id="filter-year-from" placeholder="z. B. 1970">
-        </label>
-        <label>
-          <span>Jahr bis</span>
-          <input type="number" id="filter-year-to" placeholder="z. B. 1990">
-        </label>
-      </div>
-      <button type="button" class="secondary filter-reset-btn" id="filter-reset-btn">Filter zurücksetzen</button>
-    </div>
-    <div id="records-grid" class="items-grid"></div>
-    <div id="empty-state" class="empty-state" hidden>
-      <div class="empty-icon">💿</div>
-      <p>Noch keine Platten in der Sammlung.</p>
-      <p class="empty-hint">Füge oben deine erste Platte hinzu.</p>
-    </div>
-  </section>
-</div>
-<aside class="side-panel" id="collection-overview"></aside>
 </div>
 
 <div id="scan-modal" class="modal-overlay" hidden>
@@ -275,6 +283,17 @@
     <div class="modal-actions">
       <button type="button" class="secondary" id="collection-cancel">Abbrechen</button>
       <button type="button" id="collection-create">Erstellen</button>
+    </div>
+  </div>
+</div>
+
+<div id="promote-modal" class="modal-overlay" hidden>
+  <div class="modal">
+    <p>In welche Sammlung übernehmen?</p>
+    <select id="promote-select" style="width: 100%; margin-bottom: 18px;"></select>
+    <div class="modal-actions">
+      <button type="button" class="secondary" id="promote-cancel">Abbrechen</button>
+      <button type="button" id="promote-confirm">Übernehmen</button>
     </div>
   </div>
 </div>

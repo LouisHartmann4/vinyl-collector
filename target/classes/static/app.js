@@ -10,7 +10,8 @@ const GENRE_ICONS = {
 };
 
 const form = document.getElementById("record-form");
-const formToggle = document.getElementById("form-toggle");
+const formCard = document.getElementById("form-card");
+const formToggle = document.getElementById("add-record-btn");
 const idField = document.getElementById("record-id");
 const barcodeField = document.getElementById("barcode");
 const discogsReleaseIdField = document.getElementById("discogs-release-id");
@@ -41,9 +42,11 @@ const filterCountry = document.getElementById("filter-country");
 const filterYearFrom = document.getElementById("filter-year-from");
 const filterYearTo = document.getElementById("filter-year-to");
 const filterResetBtn = document.getElementById("filter-reset-btn");
-const statTotal = document.getElementById("stat-total");
-const statArtists = document.getElementById("stat-artists");
-const statGenres = document.getElementById("stat-genres");
+const heroSubtitle = document.getElementById("hero-subtitle");
+const dashStatTotal = document.getElementById("dash-stat-total");
+const dashStatArtists = document.getElementById("dash-stat-artists");
+const dashStatCountry = document.getElementById("dash-stat-country");
+const dashStatValue = document.getElementById("dash-stat-value");
 const confirmModal = document.getElementById("confirm-modal");
 const confirmText = document.getElementById("confirm-text");
 const confirmOk = document.getElementById("confirm-ok");
@@ -79,18 +82,42 @@ const wishlistSearchSubmit = document.getElementById("wishlist-search-submit");
 const wishlistSearchStatus = document.getElementById("wishlist-search-status");
 const wishlistSearchResults = document.getElementById("wishlist-search-results");
 const wishlistSearchCancel = document.getElementById("wishlist-search-cancel");
+const dashboardView = document.getElementById("dashboard-view");
+const collectionView = document.getElementById("collection-view");
+const backToDashboardBtn = document.getElementById("back-to-dashboard");
+const collectionTitle = document.getElementById("collection-title");
+const collStatTotal = document.getElementById("coll-stat-total");
+const collStatArtists = document.getElementById("coll-stat-artists");
+const collStatCountry = document.getElementById("coll-stat-country");
+const collStatValue = document.getElementById("coll-stat-value");
+const manualSearchInput = document.getElementById("manual-search-input");
+const manualSearchStatus = document.getElementById("manual-search-status");
+const manualSearchResults = document.getElementById("manual-search-results");
+const manualFormLink = document.getElementById("manual-form-link");
+const promoteModal = document.getElementById("promote-modal");
+const promoteSelect = document.getElementById("promote-select");
+const promoteConfirm = document.getElementById("promote-confirm");
+const promoteCancel = document.getElementById("promote-cancel");
 
 let records = [];
+let dashboardRecords = [];
 let wishlist = [];
 let collections = [];
 let currentCollectionId = localStorage.getItem("vinyl-current-collection-id");
+let currentView = "dashboard";
 let confirmAction = null;
 let toastTimer = null;
 let html5QrCode = null;
 let manualEntryTimer = null;
+let promotingWishlistItemId = null;
 
 function recordsApiUrl() {
   return `/api/collections/${currentCollectionId}/records`;
+}
+
+function generalCollectionId() {
+  const general = collections.find(c => !c.deletable);
+  return general ? general.id : null;
 }
 
 async function loadCollections() {
@@ -99,34 +126,101 @@ async function loadCollections() {
 
   if (!collections.some(c => String(c.id) === String(currentCollectionId))) {
     currentCollectionId = collections[0].id;
+    localStorage.setItem("vinyl-current-collection-id", currentCollectionId);
   }
-  localStorage.setItem("vinyl-current-collection-id", currentCollectionId);
 
   renderCollectionsGrid();
   renderRecordCollectionOptions();
-  await loadRecords();
+
+  if (currentView === "collection") {
+    await loadRecords();
+  } else {
+    await loadDashboardStats();
+  }
+}
+
+async function loadDashboardStats() {
+  const generalId = generalCollectionId();
+  if (!generalId) return;
+  const res = await fetch(`/api/collections/${generalId}/records`);
+  dashboardRecords = await res.json();
+
+  const total = dashboardRecords.length;
+  const artists = new Set(dashboardRecords.map(r => r.artist.trim().toLowerCase())).size;
+
+  const countryCounts = {};
+  dashboardRecords.forEach(r => {
+    if (r.country) countryCounts[r.country] = (countryCounts[r.country] || 0) + 1;
+  });
+  const topCountry = Object.entries(countryCounts).sort((a, b) => b[1] - a[1])[0];
+
+  const priced = dashboardRecords.filter(r => r.lastKnownPrice != null);
+  const avgPrice = priced.length ? priced.reduce((sum, r) => sum + r.lastKnownPrice, 0) / priced.length : null;
+  const totalValue = avgPrice != null ? avgPrice * total : null;
+  const currency = priced.length ? (priced[0].lastKnownPriceCurrency || "") : "";
+
+  dashStatTotal.textContent = total;
+  dashStatArtists.textContent = artists;
+  dashStatCountry.textContent = topCountry ? topCountry[0] : "–";
+  dashStatValue.textContent = totalValue != null ? `${totalValue.toFixed(2)} ${currency}` : "–";
+
+  heroSubtitle.textContent = `${total} ${total === 1 ? "Platte" : "Platten"} in der Sammlung`;
 }
 
 function renderCollectionsGrid() {
   collectionsGrid.innerHTML = "";
   collections.forEach(c => {
     const card = document.createElement("div");
-    card.className = "item-card collection-card" + (String(c.id) === String(currentCollectionId) ? " active" : "");
+    card.className = "tile" + (String(c.id) === String(currentCollectionId) && currentView === "collection" ? " active" : "");
     card.innerHTML = `
-      <span class="item-name">${c.deletable ? "💿" : "📚"} ${escapeHtml(c.name)}</span>
-      <span class="item-expiry">${c.recordCount} ${c.recordCount === 1 ? "Platte" : "Platten"}</span>
-      ${c.deletable ? `<div class="item-actions"><button class="icon-btn delete" data-id="${c.id}" data-name="${escapeHtml(c.name)}" data-count="${c.recordCount}">Löschen</button></div>` : ""}
+      <div class="cover" id="cover-${c.id}"></div>
+      <div class="overlay">
+        <div class="count">${c.recordCount}</div>
+        <div class="name">${escapeHtml(c.name)}</div>
+      </div>
+      ${c.deletable ? `<button type="button" class="tile-rm" data-id="${c.id}" data-name="${escapeHtml(c.name)}" data-count="${c.recordCount}" aria-label="Löschen">×</button>` : ""}
     `;
     card.addEventListener("click", e => {
       if (e.target.closest("button")) return;
-      switchCollection(c.id);
+      openCollectionView(c.id);
     });
     collectionsGrid.appendChild(card);
   });
 
-  collectionsGrid.querySelectorAll(".delete").forEach(btn =>
-    btn.addEventListener("click", () => requestDeleteCollection(btn.dataset.id, btn.dataset.name, btn.dataset.count))
+  const newTile = document.createElement("div");
+  newTile.className = "tile new";
+  newTile.textContent = "+ Neue Sammlung";
+  newTile.addEventListener("click", openCollectionModal);
+  collectionsGrid.appendChild(newTile);
+
+  collectionsGrid.querySelectorAll(".tile-rm").forEach(btn =>
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      requestDeleteCollection(btn.dataset.id, btn.dataset.name, btn.dataset.count);
+    })
   );
+
+  collections.forEach(c => loadCollectionCover(c.id));
+}
+
+async function loadCollectionCover(collectionId) {
+  const coverEl = document.getElementById(`cover-${collectionId}`);
+  if (!coverEl) return;
+  try {
+    const res = await fetch(`/api/collections/${collectionId}/records`);
+    const items = await res.json();
+    const covers = items.map(r => r.coverImageUrl).filter(Boolean).slice(0, 4);
+    if (covers.length === 0) return;
+
+    coverEl.classList.add("has-covers");
+    coverEl.innerHTML = Array.from({ length: 4 }, (_, i) =>
+      covers[i]
+        ? `<div class="cover-quad" style="background-image:url('${covers[i]}')"></div>`
+        : `<div class="cover-quad empty"></div>`
+    ).join("");
+  } catch (err) {
+    // Platzhalter-Textur bleibt bestehen
+  }
 }
 
 function renderRecordCollectionOptions() {
@@ -141,7 +235,6 @@ function renderRecordCollectionOptions() {
 
   const canAdd = targetable.length > 0;
   noTargetCollectionHint.hidden = canAdd;
-  formToggle.disabled = !canAdd;
   scanToggle.disabled = !canAdd;
 
   if (canAdd) {
@@ -152,13 +245,25 @@ function renderRecordCollectionOptions() {
   }
 }
 
-async function switchCollection(id) {
+async function openCollectionView(id) {
   currentCollectionId = id;
   localStorage.setItem("vinyl-current-collection-id", currentCollectionId);
+  currentView = "collection";
   resetForm();
+  dashboardView.hidden = true;
+  collectionView.hidden = false;
   renderCollectionsGrid();
   renderRecordCollectionOptions();
   await loadRecords();
+}
+
+function showDashboard() {
+  currentView = "dashboard";
+  resetForm();
+  collectionView.hidden = true;
+  dashboardView.hidden = false;
+  renderCollectionsGrid();
+  loadDashboardStats();
 }
 
 function openCollectionModal() {
@@ -181,9 +286,8 @@ async function submitNewCollection() {
   });
   const created = await res.json();
   closeCollectionModal();
-  currentCollectionId = created.id;
-  localStorage.setItem("vinyl-current-collection-id", currentCollectionId);
   await loadCollections();
+  await openCollectionView(created.id);
   showToast("Sammlung erstellt");
 }
 
@@ -204,17 +308,15 @@ async function loadRecords() {
   const res = await fetch(recordsApiUrl());
   records = await res.json();
   renderRecords();
-  renderCollectionOverview();
+  renderCollectionStats();
 }
 
-function renderCollectionOverview() {
-  const overview = document.getElementById("collection-overview");
-  if (!overview) return;
+function renderCollectionStats() {
+  const current = collections.find(c => String(c.id) === String(currentCollectionId));
+  collectionTitle.textContent = current ? current.name : "Sammlung";
 
-  if (records.length === 0) {
-    overview.innerHTML = `<h3>Übersicht</h3><p class="overview-empty">Noch keine Platten in dieser Sammlung.</p>`;
-    return;
-  }
+  const total = records.length;
+  const artists = new Set(records.map(r => r.artist.trim().toLowerCase())).size;
 
   const countryCounts = {};
   records.forEach(r => {
@@ -223,44 +325,14 @@ function renderCollectionOverview() {
   const topCountry = Object.entries(countryCounts).sort((a, b) => b[1] - a[1])[0];
 
   const priced = records.filter(r => r.lastKnownPrice != null);
-  const highest = priced.length ? priced.reduce((a, b) => (b.lastKnownPrice > a.lastKnownPrice ? b : a)) : null;
-  const lowest = priced.length ? priced.reduce((a, b) => (b.lastKnownPrice < a.lastKnownPrice ? b : a)) : null;
   const avgPrice = priced.length ? priced.reduce((sum, r) => sum + r.lastKnownPrice, 0) / priced.length : null;
-  const totalValue = avgPrice != null ? avgPrice * records.length : null;
+  const totalValue = avgPrice != null ? avgPrice * total : null;
   const currency = priced.length ? (priced[0].lastKnownPriceCurrency || "") : "";
 
-  overview.innerHTML = `
-    <h3>Übersicht</h3>
-    <div class="overview-item">
-      <span>Anzahl der Platten</span>
-      <strong>${records.length}</strong>
-    </div>
-    <div class="overview-item">
-      <span>Häufigstes Land</span>
-      <strong>${topCountry ? `${escapeHtml(topCountry[0])} (${topCountry[1]})` : "–"}</strong>
-    </div>
-    ${highest ? `
-    <div class="overview-item">
-      <span>Höchster Plattenpreis</span>
-      <div class="overview-price-item">
-        ${highest.coverImageUrl ? `<img class="overview-price-cover" src="${highest.coverImageUrl}" alt="" loading="lazy">` : ""}
-        <strong>${highest.lastKnownPrice.toFixed(2)} ${escapeHtml(highest.lastKnownPriceCurrency || "")}</strong>
-      </div>
-    </div>` : ""}
-    ${lowest ? `
-    <div class="overview-item">
-      <span>Niedrigster Plattenpreis</span>
-      <div class="overview-price-item">
-        ${lowest.coverImageUrl ? `<img class="overview-price-cover" src="${lowest.coverImageUrl}" alt="" loading="lazy">` : ""}
-        <strong>${lowest.lastKnownPrice.toFixed(2)} ${escapeHtml(lowest.lastKnownPriceCurrency || "")}</strong>
-      </div>
-    </div>` : ""}
-    ${totalValue != null ? `
-    <div class="overview-item overview-total">
-      <span>Gesamtwert der Sammlung</span>
-      <strong>${totalValue.toFixed(2)} ${escapeHtml(currency)}</strong>
-    </div>` : `<p class="overview-empty">Noch keine Preisdaten – scanne Platten per Barcode, um Preise zu erfassen.</p>`}
-  `;
+  collStatTotal.textContent = total;
+  collStatArtists.textContent = artists;
+  collStatCountry.textContent = topCountry ? topCountry[0] : "–";
+  collStatValue.textContent = totalValue != null ? `${totalValue.toFixed(2)} ${currency}` : "–";
 }
 
 const SEARCHABLE_FIELDS = [
@@ -296,10 +368,6 @@ function renderRecords() {
   const filtered = records.filter(r => matchesQuery(r, query) && matchesFilters(r));
   filterToggleBtn.classList.toggle("active", hasActiveFilters());
 
-  statTotal.textContent = records.length;
-  statArtists.textContent = new Set(records.map(r => r.artist.trim().toLowerCase())).size;
-  statGenres.textContent = new Set(records.map(r => r.genre)).size;
-
   recordsGrid.innerHTML = "";
   emptyState.hidden = records.length > 0;
 
@@ -307,42 +375,29 @@ function renderRecords() {
     .slice()
     .sort((a, b) => a.artist.localeCompare(b.artist) || a.title.localeCompare(b.title))
     .forEach(record => {
-      const card = document.createElement("div");
-      card.className = "item-card";
-
       const icon = GENRE_ICONS[record.genre] || "💿";
-      const meta = [record.format, record.releaseYear, record.condition]
-        .filter(Boolean)
-        .join(" · ");
-
-      card.innerHTML = `
-        ${record.coverImageUrl ? `<img class="item-cover" src="${record.coverImageUrl}" alt="" loading="lazy">` : ""}
-        <div class="item-top">
-          <span class="item-name">${escapeHtml(record.title)}</span>
-        </div>
-        <span class="record-artist">${escapeHtml(record.artist)}</span>
-        <span class="category-badge">${icon} ${escapeHtml(record.genre || "Sonstiges")}</span>
-        <span class="item-expiry">${escapeHtml(meta) || "Keine weiteren Angaben"}</span>
-        ${record.styles ? `<span class="record-styles">${escapeHtml(record.styles)}</span>` : ""}
-        ${record.country ? `<span class="record-styles">${escapeHtml(record.country)}</span>` : ""}
-        ${record.notes ? `<span class="record-notes">${escapeHtml(record.notes)}</span>` : ""}
-        <div class="item-actions">
-          <button class="icon-btn edit" data-id="${record.id}">Bearbeiten</button>
-          <button class="icon-btn delete" data-id="${record.id}">Löschen</button>
+      const tile = document.createElement("div");
+      tile.className = "rec-tile";
+      tile.innerHTML = `
+        <div class="cover${record.coverImageUrl ? " has-image" : ""}"${record.coverImageUrl ? ` style="background-image:url('${record.coverImageUrl}')"` : ""}>${record.coverImageUrl ? "" : icon}</div>
+        <button type="button" class="rm" data-id="${record.id}" aria-label="Löschen">×</button>
+        <div class="info">
+          <div class="title">${escapeHtml(record.title)}</div>
+          <div class="artist">${escapeHtml(record.artist)}${record.releaseYear ? ` · ${record.releaseYear}` : ""}</div>
         </div>
       `;
-      card.addEventListener("click", e => {
+      tile.addEventListener("click", e => {
         if (e.target.closest("button")) return;
         openDetail(record.id);
       });
-      recordsGrid.appendChild(card);
+      recordsGrid.appendChild(tile);
     });
 
-  recordsGrid.querySelectorAll(".edit").forEach(btn =>
-    btn.addEventListener("click", () => startEdit(btn.dataset.id))
-  );
-  recordsGrid.querySelectorAll(".delete").forEach(btn =>
-    btn.addEventListener("click", () => requestDelete(btn.dataset.id))
+  recordsGrid.querySelectorAll(".rm").forEach(btn =>
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      requestDelete(btn.dataset.id);
+    })
   );
 }
 
@@ -353,7 +408,7 @@ function closeDetail() {
 
 function metaItem(label, value) {
   if (!value) return "";
-  return `<div class="detail-meta-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong></div>`;
+  return `<span class="detail-chip"><span class="detail-chip-label">${escapeHtml(label)}</span>${escapeHtml(String(value))}</span>`;
 }
 
 function openDetail(id) {
@@ -374,25 +429,28 @@ function openDetail(id) {
     metaItem("Barcode", record.barcode),
   ].join("");
 
+  const tracklistRows = record.tracklist
+    ? record.tracklist.split("\n").filter(line => line.trim()).map(line => `<div class="tracklist-row">${escapeHtml(line)}</div>`).join("")
+    : "";
+
   detailContent.innerHTML = `
     <div class="detail-header">
-      ${record.coverImageUrl ? `<img class="detail-cover" src="${record.coverImageUrl}" alt="" loading="lazy">` : ""}
+      ${record.coverImageUrl ? `<div class="detail-bleed" style="background-image: url('${record.coverImageUrl}')"></div><div class="detail-bleed-overlay"></div>` : ""}
+      ${record.coverImageUrl ? `<img class="detail-cover" src="${record.coverImageUrl}" alt="" loading="lazy">` : `<div class="detail-cover detail-cover-placeholder">${icon}</div>`}
       <div class="detail-header-text">
+        <div class="kicker">${escapeHtml(record.genre || "Sonstiges")}</div>
         <h3 class="detail-title">${escapeHtml(record.title)}</h3>
         <p class="detail-artist">${escapeHtml(record.artist)}</p>
-        <div class="detail-badges">
-          <span class="category-badge">${icon} ${escapeHtml(record.genre || "Sonstiges")}</span>
-        </div>
       </div>
     </div>
-    ${metaItems ? `<div class="detail-meta-grid">${metaItems}</div>` : ""}
+    ${metaItems ? `<div class="detail-chip-row">${metaItems}</div>` : ""}
     <div class="detail-body">
-      ${record.tracklist ? `<div class="detail-section"><h4>Tracklist</h4><p class="detail-tracklist">${escapeHtml(record.tracklist)}</p></div>` : ""}
+      ${tracklistRows ? `<div class="detail-section"><h4>Tracklist</h4><div class="tracklist">${tracklistRows}</div></div>` : ""}
       ${record.notes ? `<div class="detail-section"><h4>Notizen</h4><p>${escapeHtml(record.notes)}</p></div>` : ""}
     </div>
     <div class="detail-section detail-market" id="detail-market">
       <h4>Marktwert</h4>
-      <p id="detail-market-body">${record.discogsReleaseId ? "Lade…" : "Kein Discogs-Treffer verknüpft (nur bei per Scan hinzugefügten Platten verfügbar)."}</p>
+      <p id="detail-market-body">${record.discogsReleaseId ? "Lade…" : "Kein Discogs-Treffer verknüpft (nur bei per Scan/Suche hinzugefügten Platten verfügbar)."}</p>
       ${record.discogsReleaseId ? `<button type="button" class="secondary price-analysis-btn" id="price-analysis-btn">Preisanalyse anzeigen</button>
       <div id="price-analysis-result"></div>` : ""}
     </div>
@@ -529,24 +587,24 @@ function renderPriceLineChart(container, sorted, { minPrice, maxPrice, avgPrice 
 
   const dots = sorted.map((p, i) => `
     <circle cx="${x(i)}" cy="${y(p.lowestPrice)}" r="${p.owned ? 6 : 4}"
-      fill="${p.owned ? "var(--primary-hover)" : "var(--primary)"}" stroke="#fff" stroke-width="2">
+      fill="${p.owned ? "var(--accent)" : "var(--text-dim)"}" stroke="var(--surface)" stroke-width="2">
       <title>${escapeHtml(p.label)}: ${p.lowestPrice.toFixed(2)} ${escapeHtml(p.currency || "")}</title>
     </circle>
   `).join("");
 
   const xLabels = sorted.map((p, i) => `
-    <text x="${x(i)}" y="${height - 10}" font-size="9.5" text-anchor="middle" fill="var(--muted)"
+    <text x="${x(i)}" y="${height - 10}" font-size="9.5" text-anchor="middle" fill="var(--text-faint)"
       transform="rotate(20 ${x(i)} ${height - 10})">${escapeHtml(truncateLabel(p.label))}</text>
   `).join("");
 
   container.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" class="price-line-svg" preserveAspectRatio="xMidYMid meet">
       <line x1="${padLeft}" y1="${avgY}" x2="${width - padRight}" y2="${avgY}" stroke="var(--border)" stroke-width="1" />
-      <text x="${width - padRight}" y="${avgY - 4}" font-size="10" text-anchor="end" fill="var(--muted)">Ø ${avgPrice.toFixed(2)}</text>
+      <text x="${width - padRight}" y="${avgY - 4}" font-size="10" text-anchor="end" fill="var(--text-faint)">Ø ${avgPrice.toFixed(2)}</text>
       <line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${height - padBottom}" stroke="var(--border)" stroke-width="1" />
-      <text x="${padLeft - 6}" y="${y(maxPrice) + 4}" font-size="9.5" text-anchor="end" fill="var(--muted)">${maxPrice.toFixed(0)}</text>
-      <text x="${padLeft - 6}" y="${y(minPrice) + 4}" font-size="9.5" text-anchor="end" fill="var(--muted)">${minPrice.toFixed(0)}</text>
-      <polyline points="${linePoints}" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+      <text x="${padLeft - 6}" y="${y(maxPrice) + 4}" font-size="9.5" text-anchor="end" fill="var(--text-faint)">${maxPrice.toFixed(0)}</text>
+      <text x="${padLeft - 6}" y="${y(minPrice) + 4}" font-size="9.5" text-anchor="end" fill="var(--text-faint)">${minPrice.toFixed(0)}</text>
+      <polyline points="${linePoints}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
       ${dots}
       ${xLabels}
     </svg>
@@ -563,10 +621,25 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+function fillFormFromRelease(release) {
+  artistField.value = release.artist || "";
+  titleField.value = release.title || "";
+  genreField.value = matchOption(genreField, release.genre);
+  releaseYearField.value = release.releaseYear || "";
+  formatField.value = matchOption(formatField, release.format);
+  stylesField.value = release.styles || "";
+  countryField.value = release.country || "";
+  labelField.value = release.label || "";
+  catalogNumberField.value = release.catalogNumber || "";
+  coverImageUrlField.value = release.coverImageUrl || "";
+  tracklistField.value = release.tracklist || "";
+}
+
 function openForm() {
+  formCard.hidden = false;
   form.hidden = false;
-  formToggle.classList.add("open");
   renderRecordCollectionOptions();
+  formCard.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function startEdit(id) {
@@ -601,7 +674,7 @@ function resetForm() {
   discogsReleaseIdField.value = "";
   submitBtn.textContent = "Hinzufügen";
   form.hidden = true;
-  formToggle.classList.remove("open");
+  formCard.hidden = true;
 }
 
 function requestDelete(id) {
@@ -790,17 +863,7 @@ async function applyRelease(releaseId, code) {
     openForm();
     barcodeField.value = code;
     discogsReleaseIdField.value = releaseId;
-    artistField.value = release.artist || "";
-    titleField.value = release.title || "";
-    genreField.value = matchOption(genreField, release.genre);
-    releaseYearField.value = release.releaseYear || "";
-    formatField.value = matchOption(formatField, release.format);
-    stylesField.value = release.styles || "";
-    countryField.value = release.country || "";
-    labelField.value = release.label || "";
-    catalogNumberField.value = release.catalogNumber || "";
-    coverImageUrlField.value = release.coverImageUrl || "";
-    tracklistField.value = release.tracklist || "";
+    fillFormFromRelease(release);
     showToast("Daten von Discogs geladen – bitte prüfen und ergänzen");
     artistField.focus();
   } catch (err) {
@@ -811,7 +874,55 @@ async function applyRelease(releaseId, code) {
   }
 }
 
-newCollectionBtn.addEventListener("click", openCollectionModal);
+async function submitManualSearch() {
+  const query = manualSearchInput.value.trim();
+  if (!query) return;
+
+  manualSearchStatus.hidden = false;
+  manualSearchStatus.textContent = "Suche läuft…";
+  manualSearchResults.innerHTML = "";
+
+  try {
+    const res = await fetch(`/api/discogs/search-text?q=${encodeURIComponent(query)}`);
+    if (!res.ok) throw new Error("Discogs-Suche fehlgeschlagen");
+    const results = await res.json();
+
+    if (results.length === 0) {
+      manualSearchStatus.textContent = "Keine Treffer gefunden.";
+      return;
+    }
+
+    manualSearchStatus.hidden = true;
+    results.slice(0, 8).forEach(r => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "suggestion";
+      btn.innerHTML = `${escapeHtml(r.title)}${r.year ? ` <span class="dim">${r.year}</span>` : ""}`;
+      btn.addEventListener("click", () => applyManualSearchResult(r.id));
+      manualSearchResults.appendChild(btn);
+    });
+  } catch (err) {
+    manualSearchStatus.hidden = false;
+    manualSearchStatus.textContent = "Discogs nicht erreichbar.";
+  }
+}
+
+async function applyManualSearchResult(releaseId) {
+  try {
+    const res = await fetch(`/api/discogs/release/${releaseId}`);
+    if (!res.ok) throw new Error("Discogs-Release fehlgeschlagen");
+    const release = await res.json();
+    openForm();
+    discogsReleaseIdField.value = releaseId;
+    fillFormFromRelease(release);
+    showToast("Daten von Discogs geladen – bitte prüfen und ergänzen");
+    artistField.focus();
+  } catch (err) {
+    showToast("Discogs-Daten konnten nicht geladen werden");
+  }
+}
+
+newCollectionBtn.addEventListener("click", e => { e.preventDefault(); openCollectionModal(); });
 collectionCancel.addEventListener("click", closeCollectionModal);
 collectionCreate.addEventListener("click", submitNewCollection);
 collectionModal.addEventListener("click", e => {
@@ -842,6 +953,24 @@ manualBarcodeInput.addEventListener("keydown", e => {
 formToggle.addEventListener("click", () => {
   if (form.hidden) openForm();
   else resetForm();
+});
+
+manualFormLink.addEventListener("click", e => {
+  e.preventDefault();
+  resetForm();
+  openForm();
+});
+
+manualSearchInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    submitManualSearch();
+  }
+});
+
+backToDashboardBtn.addEventListener("click", e => {
+  e.preventDefault();
+  showDashboard();
 });
 
 confirmOk.addEventListener("click", async () => {
@@ -897,7 +1026,10 @@ form.addEventListener("submit", async e => {
   const wasEdit = !!id;
   resetForm();
   currentCollectionId = targetCollectionId;
+  currentView = "collection";
   localStorage.setItem("vinyl-current-collection-id", currentCollectionId);
+  dashboardView.hidden = true;
+  collectionView.hidden = false;
   await loadCollections();
   showToast(wasEdit ? "Platte aktualisiert" : "Platte hinzugefügt");
 });
@@ -913,21 +1045,25 @@ function renderWishlistGrid() {
   wishlistEmptyState.hidden = wishlist.length > 0;
 
   wishlist.forEach(item => {
-    const row = document.createElement("div");
-    row.className = "wishlist-list-row";
-    row.innerHTML = `
-      ${item.coverImageUrl ? `<img class="wishlist-list-cover" src="${item.coverImageUrl}" alt="" loading="lazy">` : `<div class="wishlist-list-cover"></div>`}
-      <div class="wishlist-list-text">
-        <span class="wishlist-list-title">${escapeHtml(item.title)}</span>
-        <span class="wishlist-list-artist">${escapeHtml(item.artist)}</span>
-        ${item.lastKnownPrice != null ? `<span class="wishlist-list-price">ab ${item.lastKnownPrice.toFixed(2)} ${escapeHtml(item.lastKnownPriceCurrency || "")}</span>` : ""}
+    const card = document.createElement("div");
+    card.className = "wish";
+    card.innerHTML = `
+      <div class="art${item.coverImageUrl ? " has-image" : ""}"${item.coverImageUrl ? ` style="background-image:url('${item.coverImageUrl}')"` : ""}></div>
+      <div class="info">
+        <div class="title">${escapeHtml(item.title)}</div>
+        <div class="artist">${escapeHtml(item.artist)}</div>
+        ${item.lastKnownPrice != null ? `<div class="price">ab ${item.lastKnownPrice.toFixed(2)} ${escapeHtml(item.lastKnownPriceCurrency || "")}</div>` : ""}
       </div>
-      <button type="button" class="wishlist-list-remove" data-id="${item.id}" aria-label="Entfernen">✕</button>
+      <button type="button" class="add" data-id="${item.id}">+ Sammlung</button>
+      <button type="button" class="rm" data-id="${item.id}" aria-label="Entfernen">×</button>
     `;
-    wishlistGrid.appendChild(row);
+    wishlistGrid.appendChild(card);
   });
 
-  wishlistGrid.querySelectorAll(".wishlist-list-remove").forEach(btn =>
+  wishlistGrid.querySelectorAll(".add").forEach(btn =>
+    btn.addEventListener("click", () => openPromoteModal(btn.dataset.id))
+  );
+  wishlistGrid.querySelectorAll(".rm").forEach(btn =>
     btn.addEventListener("click", () => requestRemoveFromWishlist(btn.dataset.id))
   );
 }
@@ -941,6 +1077,62 @@ function requestRemoveFromWishlist(id) {
   };
   confirmModal.hidden = false;
 }
+
+function openPromoteModal(id) {
+  promotingWishlistItemId = id;
+  const targetable = collections.filter(c => c.deletable);
+  if (targetable.length === 0) {
+    showToast("Lege zuerst eine Sammlung an");
+    return;
+  }
+  promoteSelect.innerHTML = "";
+  targetable.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.name;
+    promoteSelect.appendChild(opt);
+  });
+  promoteModal.hidden = false;
+}
+
+function closePromoteModal() {
+  promoteModal.hidden = true;
+  promotingWishlistItemId = null;
+}
+
+async function confirmPromoteWishlistItem() {
+  const item = wishlist.find(w => String(w.id) === String(promotingWishlistItemId));
+  const targetCollectionId = promoteSelect.value;
+  if (!item || !targetCollectionId) return;
+
+  await fetch(`/api/collections/${targetCollectionId}/records`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      artist: item.artist,
+      title: item.title,
+      format: item.format,
+      genre: "Sonstiges",
+      condition: "Sehr gut+ (VG+)",
+      releaseYear: item.releaseYear,
+      catalogNumber: item.catalogNumber,
+      coverImageUrl: item.coverImageUrl,
+      discogsReleaseId: item.discogsReleaseId,
+    }),
+  });
+  await fetch(`/api/wishlist/${item.id}`, { method: "DELETE" });
+
+  closePromoteModal();
+  await loadWishlist();
+  await loadCollections();
+  showToast("Zur Sammlung hinzugefügt");
+}
+
+promoteConfirm.addEventListener("click", confirmPromoteWishlistItem);
+promoteCancel.addEventListener("click", closePromoteModal);
+promoteModal.addEventListener("click", e => {
+  if (e.target === promoteModal) closePromoteModal();
+});
 
 function openWishlistSearchModal() {
   wishlistSearchModal.hidden = false;
@@ -1013,7 +1205,7 @@ async function addToWishlist(releaseId) {
   }
 }
 
-wishlistSearchBtn.addEventListener("click", openWishlistSearchModal);
+wishlistSearchBtn.addEventListener("click", e => { e.preventDefault(); openWishlistSearchModal(); });
 wishlistSearchCancel.addEventListener("click", closeWishlistSearchModal);
 wishlistSearchModal.addEventListener("click", e => {
   if (e.target === wishlistSearchModal) closeWishlistSearchModal();

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>VinylCollector – Redesign Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B0B0A;
+    --surface: #151412;
+    --surface-2: #1C1B18;
+    --border: #2E2C27;
+    --text: #EDEBE4;
+    --text-dim: #9A968C;
+    --text-faint: #64615A;
+    --accent: #C5432A;
+    --accent-dim: #6E2C1E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }T
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    padding: 40px;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .logo {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: repeating-radial-gradient(circle, var(--surface-2) 0px, var(--surface-2) 2px, #0000 2px, #0000 4px);
+    border: 2px solid var(--accent);
+    position: relative;
+  }
+  .logo::after {
+    content: "";
+    position: absolute; top: 50%; left: 50%;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  h1 {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  header p { color: var(--text-dim); font-size: 13px; margin-top: 2px; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    margin-bottom: 40px;
+  }
+  .stat {
+    background: var(--surface);
+    padding: 20px 24px;
+  }
+  .stat .num { font-family: 'Archivo Black', sans-serif; font-size: 28px; }
+  .stat .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); margin-top: 4px; }
+  .stat.hi .num { color: var(--accent); }
+
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+  }
+  .section-head h2 {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .section-head a { color: var(--accent); font-size: 13px; text-decoration: none; font-weight: 500; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    aspect-ratio: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .tile .cover {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(135deg, var(--surface-2) 0 6px, #1a1815 6px 12px);
+    opacity: 0.9;
+  }
+  .tile .overlay {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 14px;
+    background: linear-gradient(to top, rgba(11,11,10,0.95), rgba(11,11,10,0));
+  }
+  .tile .count { font-family: 'Archivo Black', sans-serif; font-size: 22px; }
+  .tile .name { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+  .tile.new {
+    display: flex; align-items: center; justify-content: center;
+    border-style: dashed;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+
+  .record-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 200px 1fr;
+  }
+  .record-card .art {
+    background: repeating-linear-gradient(135deg, #241f1a 0 6px, #1a1815 6px 12px);
+    border-right: 1px solid var(--border);
+  }
+  .record-card .body { padding: 28px 32px; }
+  .record-card .kicker { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+  .record-card h3 { font-family: 'Archivo Black', sans-serif; font-size: 26px; margin: 6px 0 2px; }
+  .record-card .artist { color: var(--text-dim); font-size: 15px; margin-bottom: 18px; }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .meta div { min-width: 90px; }
+  .meta .k { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+  .meta .v { font-size: 14px; margin-top: 3px; }
+
+  .market {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface-2);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+  }
+  .market .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+  .market .price { font-family: 'Archivo Black', sans-serif; font-size: 22px; color: var(--accent); margin-top: 2px; }
+  .market button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 18px;
+    cursor: pointer;
+  }
+  .market button:hover { border-color: var(--accent); color: var(--accent); }
+
+  .wish-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .wish {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .wish .art {
+    width: 52px; height: 52px;
+    flex-shrink: 0;
+    background: repeating-linear-gradient(135deg, #232120 0 5px, #1a1815 5px 10px);
+    filter: grayscale(1);
+    opacity: 0.55;
+    border: 1px solid var(--border);
+  }
+  .wish .info { flex: 1; min-width: 0; }
+  .wish .title { font-size: 13px; font-weight: 500; }
+  .wish .artist { font-size: 12px; color: var(--text-faint); margin-top: 1px; }
+  .wish .price { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); margin-top: 6px; }
+  .wish .add {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11px;
+    padding: 6px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .wish .add:hover { border-color: var(--accent); color: var(--accent); }
+
+  .add-flow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .add-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+  }
+  .add-card .icon {
+    width: 36px; height: 36px;
+    border: 1px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .add-card h4 { font-family: 'Archivo Black', sans-serif; font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .add-card p { font-size: 13px; color: var(--text-dim); line-height: 1.5; margin-bottom: 16px; }
+  .add-card .step {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-faint);
+    padding: 6px 0;
+    border-top: 1px solid var(--border);
+  }
+  .add-card .step:first-of-type { border-top: none; }
+  .add-card input {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .add-card .suggestion {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .add-card .suggestion .sw {
+    width: 28px; height: 28px;
+    background: repeating-linear-gradient(135deg, #232120 0 5px, #1a1815 5px 10px);
+    flex-shrink: 0;
+  }
+
+  .collection-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .back {
+    color: var(--text-faint);
+    font-size: 13px;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+  }
+  .back:hover { color: var(--accent); border-color: var(--accent); }
+  .collection-head h2 {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 20px;
+    text-transform: uppercase;
+  }
+  .collection-head .sub { color: var(--text-faint); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+
+  .rec-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 48px;
+  }
+  .rec-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .rec-tile .cover {
+    aspect-ratio: 1;
+    background: repeating-linear-gradient(135deg, var(--surface-2) 0 6px, #1a1815 6px 12px);
+  }
+  .rec-tile .info { padding: 10px 12px; }
+  .rec-tile .title { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rec-tile .artist { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+  .rec-tile .rm {
+    position: absolute; top: 8px; right: 8px;
+    width: 20px; height: 20px;
+    background: rgba(11,11,10,0.85);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .rec-tile:hover .rm { opacity: 1; }
+  .rec-tile .rm:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo"></div>
+    <div>
+      <h1>Vinyl Collector</h1>
+      <p>15 Platten · zuletzt aktualisiert vor 2 Std.</p>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="num">15</div><div class="label">Platten gesamt</div></div>
+    <div class="stat"><div class="num">9</div><div class="label">Interpreten</div></div>
+    <div class="stat"><div class="num">EU</div><div class="label">Häufigstes land</div></div>
+    <div class="stat hi"><div class="num">830 €</div><div class="label">Gesamtwert</div></div>
+  </div>
+
+  <div class="section-head">
+    <h2>Sammlungen</h2>
+    <a href="#">+ Neue sammlung</a>
+  </div>
+  <div class="grid">
+    <div class="tile">
+      <div class="cover"></div>
+      <div class="overlay"><div class="count">15</div><div class="name">Alle platten</div></div>
+    </div>
+    <div class="tile">
+      <div class="cover"></div>
+      <div class="overlay"><div class="count">3</div><div class="name">Black sabbath</div></div>
+    </div>
+    <div class="tile">
+      <div class="cover"></div>
+      <div class="overlay"><div class="count">5</div><div class="name">Dream theater</div></div>
+    </div>
+    <div class="tile new">+ Neue sammlung</div>
+  </div>
+
+  <div class="section-head">
+    <h2>Zuletzt angesehen</h2>
+  </div>
+  <div class="record-card">
+    <div class="art"></div>
+    <div class="body">
+      <div class="kicker">Rock · Progressive metal</div>
+      <h3>Black Clouds &amp; Silver Linings</h3>
+      <div class="artist">Dream Theater</div>
+
+      <div class="meta">
+        <div><div class="k">Jahr</div><div class="v">2009</div></div>
+        <div><div class="k">Format</div><div class="v">LP</div></div>
+        <div><div class="k">Zustand</div><div class="v">Mint (M)</div></div>
+        <div><div class="k">Label</div><div class="v">Roadrunner</div></div>
+        <div><div class="k">Katalog-Nr.</div><div class="v">RRCAR 7883-1</div></div>
+        <div><div class="k">Barcode</div><div class="v">4024572386115</div></div>
+      </div>
+
+      <div class="market">
+        <div>
+          <div class="label">Marktwert · ab</div>
+          <div class="price">130,00 €</div>
+        </div>
+        <button>Preisanalyse ansehen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Platte erfassen</h2>
+  </div>
+  <div class="add-flow">
+    <div class="add-card">
+      <div class="icon">◎</div>
+      <h4>Barcode scannen</h4>
+      <p>Kamera öffnen, Barcode ins Bild halten – Discogs-Treffer wird automatisch geladen.</p>
+      <div class="step">01 · Kamera aktivieren</div>
+      <div class="step">02 · Barcode erkannt → Discogs-Abfrage</div>
+      <div class="step">03 · Treffer prüfen &amp; übernehmen</div>
+    </div>
+    <div class="add-card">
+      <div class="icon">Aa</div>
+      <h4>Manuell suchen</h4>
+      <p>Titel oder Interpret eingeben, Treffer aus Discogs übernehmen.</p>
+      <input type="text" placeholder="z. B. Dream Theater – Awake" disabled>
+      <div class="suggestion">
+        <div class="sw"></div>
+        <div>Awake · Dream Theater · 1994</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Wunschliste</h2>
+    <a href="#">+ Manuell hinzufügen</a>
+  </div>
+  <div class="wish-grid">
+    <div class="wish">
+      <div class="art"></div>
+      <div class="info">
+        <div class="title">Octavarium</div>
+        <div class="artist">Dream Theater</div>
+        <div class="price">ab 1,17 €</div>
+      </div>
+      <button class="add">+ Sammlung</button>
+    </div>
+    <div class="wish">
+      <div class="art"></div>
+      <div class="info">
+        <div class="title">Lover</div>
+        <div class="artist">Taylor Swift</div>
+        <div class="price">ab 10,11 €</div>
+      </div>
+      <button class="add">+ Sammlung</button>
+    </div>
+  </div>
+
+  <div class="collection-head">
+    <a href="#" class="back">← Zurück</a>
+    <div>
+      <h2>Dream Theater</h2>
+      <div class="sub">5 platten · gesamtwert 412,00 €</div>
+    </div>
+  </div>
+  <div class="rec-grid">
+    <div class="rec-tile">
+      <div class="cover"></div>
+      <div class="rm">×</div>
+      <div class="info"><div class="title">Awake</div><div class="artist">1994</div></div>
+    </div>
+    <div class="rec-tile">
+      <div class="cover"></div>
+      <div class="rm">×</div>
+      <div class="info"><div class="title">Metropolis Pt. 2</div><div class="artist">1999</div></div>
+    </div>
+    <div class="rec-tile">
+      <div class="cover"></div>
+      <div class="rm">×</div>
+      <div class="info"><div class="title">Black Clouds &amp; Silver Linings</div><div class="artist">2009</div></div>
+    </div>
+    <div class="rec-tile">
+      <div class="cover"></div>
+      <div class="rm">×</div>
+      <div class="info"><div class="title">Images and Words</div><div class="artist">1992</div></div>
+    </div>
+    <div class="rec-tile">
+      <div class="cover"></div>
+      <div class="rm">×</div>
+      <div class="info"><div class="title">Falling Into Infinity</div><div class="artist">1997</div></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
