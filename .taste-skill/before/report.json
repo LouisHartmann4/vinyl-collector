@@ -1,0 +1,2092 @@
+{
+ "url": "http://localhost:8091/",
+ "at": "2026-10-27T16:10:18.527Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 2,
+   "filled": [
+    0.4,
+    0.44
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 1465,
+     "screens": 1.6,
+     "words": 109,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 2,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 15,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Vinyl Collector",
+     "words": 2,
+     "chars": 15,
+     "lines": 1,
+     "size": 26,
+     "vw": 1.8,
+     "font": "Archivo Black",
+     "weight": 700,
+     "tracking": 0.02,
+     "leading": 1.2,
+     "top": 40,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "VINYL COLLECTOR",
+     "words": 2,
+     "lines": 1,
+     "size": 26,
+     "font": "Archivo Black"
+    },
+    "headings": [
+     {
+      "text": "13",
+      "words": 1,
+      "chars": 2,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.17,
+      "top": 174,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "13",
+      "words": 1,
+      "chars": 2,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.17,
+      "top": 174,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "US",
+      "words": 1,
+      "chars": 2,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.17,
+      "top": 174,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "382.24 EUR",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": true,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.17,
+      "top": 174,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 4,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter",
+       "share": 0.55,
+       "mono": false
+      },
+      {
+       "family": "JetBrains Mono",
+       "share": 0.27,
+       "mono": true
+      },
+      {
+       "family": "Archivo Black",
+       "share": 0.17,
+       "mono": false
+      },
+      {
+       "family": "Arial",
+       "share": 0.01,
+       "mono": false
+      }
+     ],
+     "familyCount": 4,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      22,
+      26,
+      28
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter",
+      "size": 13,
+      "leading": 1.5,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 6.9
+     },
+     "measureChars": 83,
+     "max": {
+      "size": 28,
+      "vw": 1.9,
+      "font": "Archivo Black",
+      "text": "13"
+     },
+     "monoShare": 0.27,
+     "monoProseShare": 0.27,
+     "monoFamilies": [
+      "JetBrains Mono"
+     ],
+     "monoSamples": [
+      "Platten gesamt",
+      "Interpreten",
+      "Häufigstes Land",
+      "Gesamtwert",
+      "Alle Platten",
+      "Prog & Rock"
+     ],
+     "microLabels": 8,
+     "microLabelShare": 0.156,
+     "microSamples": [
+      "Platten gesamt",
+      "Interpreten",
+      "Häufigstes Land",
+      "Gesamtwert",
+      "Alle Platten",
+      "Prog & Rock"
+     ],
+     "upperShare": 0.36,
+     "centerShare": 0.09,
+     "smallText": 6
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#1a1917",
+     "bodyBgHsl": {
+      "h": 40,
+      "s": 0.06,
+      "l": 0.1
+     },
+     "dark": true,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#aca89e",
+       "share": 0.42
+      },
+      {
+       "color": "#f3f1ea",
+       "share": 0.23
+      },
+      {
+       "color": "#7a766d",
+       "share": 0.21
+      },
+      {
+       "color": "#d14e33",
+       "share": 0.14
+      }
+     ],
+     "button": null,
+     "lowContrast": [
+      {
+       "text": "Platten gesamt",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Interpreten",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Häufigstes Land",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Gesamtwert",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "+ Neue Sammlung",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 13,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Kate Bush",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 12,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 4,
+     "inHero": 0,
+     "radius": 0,
+     "height": 28,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 3,
+     "upper": 3,
+     "heroLabels": []
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "header 1200px"
+     ],
+     "outlinedBoxes": 10,
+     "dashed": 4,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": false,
+       "top": 154
+      },
+      {
+       "count": 5,
+       "iconTopped": false,
+       "rounded": false,
+       "top": 327
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 82,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "archivo black",
+     "inter",
+     "jetbrains mono"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 1465,
+    "margins": {
+     "left": 120,
+     "right": 120
+    },
+    "sections": [
+     {
+      "sel": "div#collections-grid.grid",
+      "tag": "div",
+      "top": 327,
+      "height": 592,
+      "words": 13,
+      "media": 15,
+      "middle": 18,
+      "heading": {
+       "text": "13",
+       "size": 22,
+       "tag": "div"
+      },
+      "left": 121,
+      "right": 121,
+      "textLeft": 135,
+      "textRight": 314,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.add-flow",
+      "tag": "div",
+      "top": 1147,
+      "height": 230,
+      "words": 34,
+      "media": 0,
+      "middle": 95,
+      "heading": {
+       "text": "Barcode scannen",
+       "size": 14,
+       "tag": "h4"
+      },
+      "left": 145,
+      "right": 145,
+      "textLeft": 145,
+      "textRight": 299,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "VINYL COLLECTOR",
+      "size": 26,
+      "top": 40,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 120,
+      "n": 3
+     },
+     {
+      "x": 180,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 4,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.2,
+    "voidBox": {
+     "x": 360,
+     "y": 660,
+     "w": 1080,
+     "h": 240
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": true,
+    "ground": "#1a1917",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 120,
+     "right": 120
+    },
+    "hero": {
+     "text": "Vinyl Collector",
+     "words": 2,
+     "chars": 15,
+     "lines": 1,
+     "size": 26,
+     "vw": 1.8,
+     "font": "Archivo Black",
+     "weight": 700,
+     "tracking": 0.02,
+     "leading": 1.2,
+     "top": 40,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 11,
+     "firstScreen": 6,
+     "ragged": [],
+     "voids": [
+      {
+       "gap": 135,
+       "at": 783,
+       "panel": "+ Neue Sammlung"
+      }
+     ]
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 15,
+     "radii": [
+      [
+       0,
+       15
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 3,
+     "tabularShare": 0,
+     "kpiMax": 28
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.29,
+     "tiny": 20,
+     "tinySamples": [
+      "Genre 10px",
+      "Format 10px",
+      "Zustand 10px",
+      "Land 10px"
+     ],
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      20,
+      22,
+      26,
+      28
+     ]
+    },
+    "title": {
+     "text": "VINYL COLLECTOR",
+     "size": 26,
+     "top": 40
+    },
+    "colourShare": 0.051
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 3,
+   "filled": [
+    0.67,
+    0.63,
+    0.58
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 2371,
+     "screens": 2.3,
+     "words": 109,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 2,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 15,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Vinyl Collector",
+     "words": 2,
+     "chars": 15,
+     "lines": 1,
+     "size": 26,
+     "vw": 3.4,
+     "font": "Archivo Black",
+     "weight": 700,
+     "tracking": 0.02,
+     "leading": 1.2,
+     "top": 40,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "VINYL COLLECTOR",
+     "words": 2,
+     "lines": 1,
+     "size": 26,
+     "font": "Archivo Black"
+    },
+    "headings": [
+     {
+      "text": "VINYL COLLECTOR",
+      "words": 2,
+      "chars": 15,
+      "lines": 1,
+      "size": 26,
+      "vw": 3.4,
+      "font": "Archivo Black",
+      "weight": 700,
+      "tracking": 0.019,
+      "leading": 1.2,
+      "upper": true,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.37,
+      "top": 40,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "13",
+      "words": 1,
+      "chars": 2,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.41,
+      "top": 174,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "13",
+      "words": 1,
+      "chars": 2,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.41,
+      "top": 174,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "US",
+      "words": 1,
+      "chars": 2,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.41,
+      "top": 271,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "382.24 EUR",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": true,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.41,
+      "top": 271,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 5,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter",
+       "share": 0.55,
+       "mono": false
+      },
+      {
+       "family": "JetBrains Mono",
+       "share": 0.27,
+       "mono": true
+      },
+      {
+       "family": "Archivo Black",
+       "share": 0.17,
+       "mono": false
+      },
+      {
+       "family": "Arial",
+       "share": 0.01,
+       "mono": false
+      }
+     ],
+     "familyCount": 4,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      22,
+      26,
+      28
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter",
+      "size": 13,
+      "leading": 1.5,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 6.9
+     },
+     "measureChars": 103,
+     "max": {
+      "size": 28,
+      "vw": 3.6,
+      "font": "Archivo Black",
+      "text": "13"
+     },
+     "monoShare": 0.27,
+     "monoProseShare": 0.27,
+     "monoFamilies": [
+      "JetBrains Mono"
+     ],
+     "monoSamples": [
+      "Platten gesamt",
+      "Interpreten",
+      "Häufigstes Land",
+      "Gesamtwert",
+      "Alle Platten",
+      "Prog & Rock"
+     ],
+     "microLabels": 8,
+     "microLabelShare": 0.156,
+     "microSamples": [
+      "Platten gesamt",
+      "Interpreten",
+      "Häufigstes Land",
+      "Gesamtwert",
+      "Alle Platten",
+      "Prog & Rock"
+     ],
+     "upperShare": 0.36,
+     "centerShare": 0.09,
+     "smallText": 6
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#1a1917",
+     "bodyBgHsl": {
+      "h": 40,
+      "s": 0.06,
+      "l": 0.1
+     },
+     "dark": true,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#aca89e",
+       "share": 0.42
+      },
+      {
+       "color": "#f3f1ea",
+       "share": 0.23
+      },
+      {
+       "color": "#7a766d",
+       "share": 0.21
+      },
+      {
+       "color": "#d14e33",
+       "share": 0.14
+      }
+     ],
+     "button": null,
+     "lowContrast": [
+      {
+       "text": "Platten gesamt",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Interpreten",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Häufigstes Land",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Gesamtwert",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "+ Neue Sammlung",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 13,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Kate Bush",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 12,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 4,
+     "inHero": 0,
+     "radius": 0,
+     "height": 28,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 3,
+     "upper": 3,
+     "heroLabels": []
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 1,
+     "scrims": 4,
+     "gradientSamples": [
+      "div.cover-quad.empty → repeating-linear-gradient(135deg, rgb(42, 40, 36) 0px, rgb(42, 40, 36) 6px, rgb(38, 36, 32) 6px, rgb(38, 36, 3"
+     ],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "header 720px"
+     ],
+     "outlinedBoxes": 10,
+     "dashed": 4,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": false,
+       "top": 154
+      },
+      {
+       "count": 5,
+       "iconTopped": false,
+       "rounded": false,
+       "top": 424
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 82,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "archivo black",
+     "inter",
+     "jetbrains mono"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 2371,
+    "margins": {
+     "left": 24,
+     "right": 24
+    },
+    "sections": [
+     {
+      "sel": "div.stats",
+      "tag": "div",
+      "top": 154,
+      "height": 193,
+      "words": 11,
+      "media": 0,
+      "middle": 248,
+      "heading": {
+       "text": "13",
+       "size": 28,
+       "tag": "div"
+      },
+      "left": 48,
+      "right": 182,
+      "textLeft": 48,
+      "textRight": 182,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div#collections-grid.grid",
+      "tag": "div",
+      "top": 424,
+      "height": 1088,
+      "words": 13,
+      "media": 15,
+      "middle": 18,
+      "heading": {
+       "text": "13",
+       "size": 22,
+       "tag": "div"
+      },
+      "left": 25,
+      "right": 25,
+      "textLeft": 39,
+      "textRight": 282,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div#wishlist-list.wish-grid",
+      "tag": "div",
+      "top": 1597,
+      "height": 180,
+      "words": 27,
+      "media": 0,
+      "middle": 84,
+      "heading": null,
+      "left": 39,
+      "right": 39,
+      "textLeft": 103,
+      "textRight": 48,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.add-flow",
+      "tag": "div",
+      "top": 1838,
+      "height": 445,
+      "words": 34,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Barcode scannen",
+       "size": 14,
+       "tag": "h4"
+      },
+      "left": 49,
+      "right": 49,
+      "textLeft": 49,
+      "textRight": 206,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "VINYL COLLECTOR",
+      "size": 26,
+      "top": 40,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 24,
+      "n": 3
+     },
+     {
+      "x": 84,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 4,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": true,
+    "ground": "#1a1917",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 24,
+     "right": 24
+    },
+    "hero": {
+     "text": "Vinyl Collector",
+     "words": 2,
+     "chars": 15,
+     "lines": 1,
+     "size": 26,
+     "vw": 3.4,
+     "font": "Archivo Black",
+     "weight": 700,
+     "tracking": 0.02,
+     "leading": 1.2,
+     "top": 40,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 11,
+     "firstScreen": 5,
+     "ragged": [],
+     "voids": [
+      {
+       "gap": 167,
+       "at": 1344,
+       "panel": "+ Neue Sammlung"
+      }
+     ]
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 15,
+     "radii": [
+      [
+       0,
+       15
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 3,
+     "tabularShare": 0,
+     "kpiMax": 28
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.29,
+     "tiny": 20,
+     "tinySamples": [
+      "Genre 10px",
+      "Format 10px",
+      "Zustand 10px",
+      "Land 10px"
+     ],
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      20,
+      22,
+      26,
+      28
+     ]
+    },
+    "title": {
+     "text": "VINYL COLLECTOR",
+     "size": 26,
+     "top": 40
+    },
+    "colourShare": 0.111
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 3,
+   "filled": [
+    0.71,
+    0.73,
+    0.77
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 1969,
+     "screens": 2.3,
+     "words": 109,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 2,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Vinyl Collector",
+     "words": 2,
+     "chars": 15,
+     "lines": 1,
+     "size": 26,
+     "vw": 6.7,
+     "font": "Archivo Black",
+     "weight": 700,
+     "tracking": 0.02,
+     "leading": 1.2,
+     "top": 20,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "VINYL COLLECTOR",
+     "words": 2,
+     "lines": 1,
+     "size": 26,
+     "font": "Archivo Black"
+    },
+    "headings": [
+     {
+      "text": "VINYL COLLECTOR",
+      "words": 2,
+      "chars": 15,
+      "lines": 1,
+      "size": 26,
+      "vw": 6.7,
+      "font": "Archivo Black",
+      "weight": 700,
+      "tracking": 0.019,
+      "leading": 1.2,
+      "upper": true,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.72,
+      "top": 20,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "13",
+      "words": 1,
+      "chars": 2,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.34,
+      "top": 154,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "13",
+      "words": 1,
+      "chars": 2,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.34,
+      "top": 154,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "US",
+      "words": 1,
+      "chars": 2,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.34,
+      "top": 251,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "382.24 EUR",
+      "words": 2,
+      "chars": 10,
+      "lines": 2,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": true,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.34,
+      "top": 251,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "13",
+      "words": 1,
+      "chars": 2,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.37,
+      "top": 554,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "6",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.37,
+      "top": 554,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "4",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.37,
+      "top": 743,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "3",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Archivo Black",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.37,
+      "top": 743,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 9,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter",
+       "share": 0.55,
+       "mono": false
+      },
+      {
+       "family": "JetBrains Mono",
+       "share": 0.27,
+       "mono": true
+      },
+      {
+       "family": "Archivo Black",
+       "share": 0.17,
+       "mono": false
+      },
+      {
+       "family": "Arial",
+       "share": 0.01,
+       "mono": false
+      }
+     ],
+     "familyCount": 4,
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      22,
+      26,
+      28
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter",
+      "size": 13,
+      "leading": 1.5,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 6.9
+     },
+     "measureChars": 48,
+     "max": {
+      "size": 28,
+      "vw": 7.2,
+      "font": "Archivo Black",
+      "text": "13"
+     },
+     "monoShare": 0.27,
+     "monoProseShare": 0.27,
+     "monoFamilies": [
+      "JetBrains Mono"
+     ],
+     "monoSamples": [
+      "Platten gesamt",
+      "Interpreten",
+      "Häufigstes Land",
+      "Gesamtwert",
+      "Alle Platten",
+      "Prog & Rock"
+     ],
+     "microLabels": 8,
+     "microLabelShare": 0.156,
+     "microSamples": [
+      "Platten gesamt",
+      "Interpreten",
+      "Häufigstes Land",
+      "Gesamtwert",
+      "Alle Platten",
+      "Prog & Rock"
+     ],
+     "upperShare": 0.36,
+     "centerShare": 0.09,
+     "smallText": 6
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#1a1917",
+     "bodyBgHsl": {
+      "h": 40,
+      "s": 0.06,
+      "l": 0.1
+     },
+     "dark": true,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#aca89e",
+       "share": 0.42
+      },
+      {
+       "color": "#f3f1ea",
+       "share": 0.23
+      },
+      {
+       "color": "#7a766d",
+       "share": 0.21
+      },
+      {
+       "color": "#d14e33",
+       "share": 0.14
+      }
+     ],
+     "button": null,
+     "lowContrast": [
+      {
+       "text": "Platten gesamt",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Interpreten",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Häufigstes Land",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Gesamtwert",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "+ Neue Sammlung",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 13,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      },
+      {
+       "text": "Kate Bush",
+       "ratio": 3.6,
+       "need": 4.5,
+       "size": 12,
+       "fg": "#7a766d",
+       "bg": "#211f1c"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 4,
+     "inHero": 0,
+     "radius": 0,
+     "height": 28,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 3,
+     "upper": 3,
+     "heroLabels": []
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 1,
+     "scrims": 4,
+     "gradientSamples": [
+      "div.cover-quad.empty → repeating-linear-gradient(135deg, rgb(42, 40, 36) 0px, rgb(42, 40, 36) 6px, rgb(38, 36, 32) 6px, rgb(38, 36, 3"
+     ],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "header 362px"
+     ],
+     "outlinedBoxes": 10,
+     "dashed": 4,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": false,
+       "top": 134
+      },
+      {
+       "count": 5,
+       "iconTopped": false,
+       "rounded": false,
+       "top": 442
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 82,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "archivo black",
+     "inter",
+     "jetbrains mono"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 1969,
+    "margins": {
+     "left": 14,
+     "right": 14
+    },
+    "sections": [
+     {
+      "sel": "div.stats",
+      "tag": "div",
+      "top": 134,
+      "height": 231,
+      "words": 11,
+      "media": 0,
+      "middle": 69,
+      "heading": {
+       "text": "13",
+       "size": 28,
+       "tag": "div"
+      },
+      "left": 38,
+      "right": 68,
+      "textLeft": 38,
+      "textRight": 68,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div#collections-grid.grid",
+      "tag": "div",
+      "top": 442,
+      "height": 551,
+      "words": 13,
+      "media": 0,
+      "middle": 18,
+      "heading": {
+       "text": "13",
+       "size": 22,
+       "tag": "div"
+      },
+      "left": 15,
+      "right": 15,
+      "textLeft": 29,
+      "textRight": 93,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div#wishlist-list.wish-grid",
+      "tag": "div",
+      "top": 1078,
+      "height": 278,
+      "words": 27,
+      "media": 0,
+      "middle": 80,
+      "heading": null,
+      "left": 29,
+      "right": 29,
+      "textLeft": 93,
+      "textRight": 38,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.add-flow",
+      "tag": "div",
+      "top": 1417,
+      "height": 484,
+      "words": 34,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Barcode scannen",
+       "size": 14,
+       "tag": "h4"
+      },
+      "left": 39,
+      "right": 39,
+      "textLeft": 39,
+      "textRight": 43,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "VINYL COLLECTOR",
+      "size": 26,
+      "top": 20,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [
+     {
+      "text": "Sammlungen",
+      "side": "left",
+      "px": 14
+     },
+     {
+      "text": "+ Neue Sammlung",
+      "side": "right",
+      "px": 14
+     },
+     {
+      "text": "Wunschliste",
+      "side": "left",
+      "px": 14
+     },
+     {
+      "text": "+ Manuell hinzufügen",
+      "side": "right",
+      "px": 14
+     },
+     {
+      "text": "Platte erfassen",
+      "side": "left",
+      "px": 14
+     }
+    ],
+    "edges": [
+     {
+      "x": 14,
+      "n": 3
+     },
+     {
+      "x": 74,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 4,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": true,
+    "ground": "#1a1917",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 14,
+     "right": 14
+    },
+    "hero": {
+     "text": "Vinyl Collector",
+     "words": 2,
+     "chars": 15,
+     "lines": 1,
+     "size": 26,
+     "vw": 6.7,
+     "font": "Archivo Black",
+     "weight": 700,
+     "tracking": 0.02,
+     "leading": 1.2,
+     "top": 20,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 11,
+     "firstScreen": 5,
+     "ragged": [],
+     "voids": [
+      {
+       "gap": 78,
+       "at": 915,
+       "panel": "+ Neue Sammlung"
+      }
+     ]
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 15,
+     "radii": [
+      [
+       0,
+       15
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 3,
+     "tabularShare": 0,
+     "kpiMax": 28
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.29,
+     "tiny": 20,
+     "tinySamples": [
+      "Genre 10px",
+      "Format 10px",
+      "Zustand 10px",
+      "Land 10px"
+     ],
+     "sizes": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      20,
+      22,
+      26,
+      28
+     ]
+    },
+    "title": {
+     "text": "VINYL COLLECTOR",
+     "size": 26,
+     "top": 20
+    },
+    "colourShare": 0.062
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "FAIL",
+   "id": "micro-label",
+   "width": 1440,
+   "message": "8 tiny uppercase letter-spaced labels (e.g. \"Platten gesamt\", \"Interpreten\", \"Häufigstes Land\", \"Gesamtwert\").",
+   "fix": "Use sentence-case text at a readable size, or delete the label.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "palette-claude",
+   "width": 1440,
+   "message": "Cream + terracotta palette (text #f3f1ea, text #d14e33).",
+   "fix": "Re-draw the palette from the library. This pairing reads as an assistant brand, not yours.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "contrast",
+   "width": 1440,
+   "message": "Low-contrast text: \"Platten gesamt\" 3.6:1 needs 4.5:1; \"Interpreten\" 3.6:1 needs 4.5:1; \"Häufigstes Land\" 3.6:1 needs 4.5:1; \"Gesamtwert\" 3.6:1 needs 4.5:1",
+   "fix": "Darken or lighten the text colour.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "font-count",
+   "width": 1440,
+   "message": "3 typefaces in use (Inter, JetBrains Mono, Archivo Black).",
+   "fix": "Two at most.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "tiny-text",
+   "width": 1440,
+   "message": "20 text blocks under 11px: Genre 10px, Format 10px, Zustand 10px, Land 10px.",
+   "fix": "Nothing below 11px; secondary text 12px, data 13–14px.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "panel-void",
+   "width": 1440,
+   "message": "1 card(s) hold a blank band inside: 135px in \"+ Neue Sammlung\".",
+   "fix": "A card stretches to its neighbour only when it has content to fill. Keep a legend or a note directly under its chart (only an action or a total may sit at a stretched card's foot), let a short card keep its own height (align-items: start), and let a filtered block shrink to its rows."
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "width": 768,
+   "message": "1 gradient fill(s): div.cover-quad.empty → repeating-linear-gradient(135deg, rgb(42, 40, 36) 0px, rgb(42, 40, 36) 6px, rgb(38, 36, 32) 6px, rgb(38, 36, 3",
+   "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility.",
+   "alsoAt": [
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "edge-text",
+   "width": 390,
+   "message": "5 text block(s) sit 12–15px from the phone's edge: \"Sammlungen\" (14px); \"+ Neue Sammlung\" (14px); \"Wunschliste\" (14px)",
+   "fix": "The page margin is 16–20px on a phone; the header and the corner labels sit on it too."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "C:\\Users\\louis\\IdeaProjects\\vinyl-collector\\.taste-skill\\before\\desktop-fold.jpg",
+   "pages": [
+    "C:\\Users\\louis\\IdeaProjects\\vinyl-collector\\.taste-skill\\before\\desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "C:\\Users\\louis\\IdeaProjects\\vinyl-collector\\.taste-skill\\before\\tablet-fold.jpg",
+   "pages": [
+    "C:\\Users\\louis\\IdeaProjects\\vinyl-collector\\.taste-skill\\before\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "C:\\Users\\louis\\IdeaProjects\\vinyl-collector\\.taste-skill\\before\\mobile-fold.jpg",
+   "pages": [
+    "C:\\Users\\louis\\IdeaProjects\\vinyl-collector\\.taste-skill\\before\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}
