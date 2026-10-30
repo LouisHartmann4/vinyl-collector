@@ -44,6 +44,10 @@ public class VinylRecord {
     private LocalDate purchaseDate;
     private String purchaseSource;
 
+    // Konto, dem der Eintrag gehört; wird nur serverseitig gesetzt
+    @JsonIgnore
+    private Long ownerId;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "record_collection",
             joinColumns = @JoinColumn(name = "record_id"),
@@ -60,6 +64,14 @@ public class VinylRecord {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     public String getArtist() {

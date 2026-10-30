@@ -1,5 +1,6 @@
 package org.example.vinyl.controller;
 
+import org.example.vinyl.AccountService;
 import org.example.vinyl.PriceTrackingService;
 import org.example.vinyl.discogs.DiscogsService;
 import org.example.vinyl.discogs.DiscogsUnavailableException;
@@ -9,6 +10,7 @@ import org.example.vinyl.model.VinylRecord;
 import org.example.vinyl.repository.PriceSnapshotRepository;
 import org.example.vinyl.repository.VinylCollectionRepository;
 import org.example.vinyl.repository.VinylRecordRepository;
+import org.example.vinyl.security.CurrentUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,25 +27,31 @@ public class VinylRecordController {
     private final DiscogsService discogsService;
     private final PriceTrackingService priceTrackingService;
     private final PriceSnapshotRepository snapshotRepository;
+    private final AccountService accountService;
+    private final CurrentUser currentUser;
 
     public VinylRecordController(VinylRecordRepository repository, VinylCollectionRepository collectionRepository,
                                   DiscogsService discogsService, PriceTrackingService priceTrackingService,
-                                  PriceSnapshotRepository snapshotRepository) {
+                                  PriceSnapshotRepository snapshotRepository, AccountService accountService,
+                                  CurrentUser currentUser) {
         this.repository = repository;
         this.collectionRepository = collectionRepository;
         this.discogsService = discogsService;
         this.priceTrackingService = priceTrackingService;
         this.snapshotRepository = snapshotRepository;
+        this.accountService = accountService;
+        this.currentUser = currentUser;
     }
 
     @GetMapping
     public List<VinylRecord> getAll(@PathVariable Long collectionId) {
-        return repository.findByCollectionsId(collectionId);
+        return repository.findByCollectionsId(requireCollection(collectionId).getId());
     }
 
     @PostMapping
     public VinylRecord create(@PathVariable Long collectionId, @RequestBody VinylRecord record) {
         record.setId(null);
+        record.setOwnerId(currentUser.id());
         record.getCollections().clear();
         record.getCollections().addAll(targetCollections(collectionId));
         fetchLatestPrice(record);
@@ -54,7 +62,9 @@ public class VinylRecordController {
 
     @PutMapping("/{id}")
     public VinylRecord update(@PathVariable Long collectionId, @PathVariable Long id, @RequestBody VinylRecord record) {
+        requireRecord(id);
         record.setId(id);
+        record.setOwnerId(currentUser.id());
         record.getCollections().clear();
         record.getCollections().addAll(targetCollections(collectionId));
         fetchLatestPrice(record);
@@ -80,7 +90,7 @@ public class VinylRecordController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long collectionId, @PathVariable Long id) {
-        repository.deleteById(id);
+        repository.delete(requireRecord(id));
         snapshotRepository.deleteByRecordId(id);
     }
 
@@ -88,8 +98,9 @@ public class VinylRecordController {
     public void deleteAll(@PathVariable Long collectionId) {
         VinylCollection collection = requireCollection(collectionId);
         if (collection.isGeneral()) {
-            repository.deleteAll();
-            snapshotRepository.deleteAll();
+            List<VinylRecord> own = repository.findByOwnerId(currentUser.id());
+            repository.deleteAll(own);
+            snapshotRepository.deleteByRecordIdIn(own.stream().map(VinylRecord::getId).toList());
             return;
         }
 
@@ -106,10 +117,7 @@ public class VinylRecordController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bitte eine konkrete Sammlung wählen");
         }
 
-        VinylCollection general = collectionRepository.findAll().stream()
-                .filter(VinylCollection::isGeneral)
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Allgemein-Sammlung fehlt"));
+        VinylCollection general = accountService.ensureGeneralCollection(currentUser.id());
 
         HashSet<VinylCollection> target = new HashSet<>();
         target.add(collection);
@@ -117,8 +125,13 @@ public class VinylRecordController {
         return target;
     }
 
+    private VinylRecord requireRecord(Long id) {
+        return repository.findByIdAndOwnerId(id, currentUser.id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Platte nicht gefunden"));
+    }
+
     private VinylCollection requireCollection(Long collectionId) {
-        return collectionRepository.findById(collectionId)
+        return collectionRepository.findByIdAndOwnerId(collectionId, currentUser.id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sammlung nicht gefunden"));
     }
 }

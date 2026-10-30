@@ -21,4 +21,7 @@ public interface PriceSnapshotRepository extends JpaRepository<PriceSnapshot, Lo
 
     @Transactional
     void deleteByRecordId(Long recordId);
+
+    @Transactional
+    void deleteByRecordIdIn(Collection<Long> recordIds);
 }

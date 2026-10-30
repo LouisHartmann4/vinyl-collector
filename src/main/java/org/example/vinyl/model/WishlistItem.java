@@ -1,5 +1,6 @@
 package org.example.vinyl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,6 +23,10 @@ public class WishlistItem {
     private Double lastKnownPrice;
     private String lastKnownPriceCurrency;
 
+    // Konto, dem der Eintrag gehört; wird nur serverseitig gesetzt
+    @JsonIgnore
+    private Long ownerId;
+
     public WishlistItem() {
     }
 
@@ -31,6 +36,14 @@ public class WishlistItem {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     public String getArtist() {

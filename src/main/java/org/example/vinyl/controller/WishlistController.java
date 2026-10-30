@@ -6,6 +6,7 @@ import org.example.vinyl.discogs.dto.DiscogsLookupResult;
 import org.example.vinyl.discogs.dto.DiscogsMarketStats;
 import org.example.vinyl.model.WishlistItem;
 import org.example.vinyl.repository.WishlistItemRepository;
+import org.example.vinyl.security.CurrentUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,20 +19,22 @@ public class WishlistController {
 
     private final WishlistItemRepository repository;
     private final DiscogsService discogsService;
+    private final CurrentUser currentUser;
 
-    public WishlistController(WishlistItemRepository repository, DiscogsService discogsService) {
+    public WishlistController(WishlistItemRepository repository, DiscogsService discogsService, CurrentUser currentUser) {
         this.repository = repository;
         this.discogsService = discogsService;
+        this.currentUser = currentUser;
     }
 
     @GetMapping
     public List<WishlistItem> getAll() {
-        return repository.findAll();
+        return repository.findByOwnerId(currentUser.id());
     }
 
     @PostMapping("/{releaseId}")
     public WishlistItem add(@PathVariable long releaseId) {
-        if (repository.existsByDiscogsReleaseId(releaseId)) {
+        if (repository.existsByDiscogsReleaseIdAndOwnerId(releaseId, currentUser.id())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Bereits auf der Wunschliste");
         }
 
@@ -48,6 +51,7 @@ public class WishlistController {
         item.setCatalogNumber(release.catalogNumber());
         item.setCoverImageUrl(release.coverImageUrl());
         item.setDiscogsReleaseId(releaseId);
+        item.setOwnerId(currentUser.id());
 
         try {
             DiscogsMarketStats stats = discogsService.getMarketStats(releaseId);
@@ -64,6 +68,7 @@ public class WishlistController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        repository.deleteById(id);
+        repository.delete(repository.findByIdAndOwnerId(id, currentUser.id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Eintrag nicht gefunden")));
     }
 }

@@ -1,3 +1,25 @@
+// ---------- Anmeldung ----------
+// Jede schreibende Anfrage schickt das CSRF-Token aus dem Cookie mit; läuft die Sitzung ab,
+// geht es zurück zur Anmeldung.
+const nativeFetch = window.fetch.bind(window);
+
+function csrfToken() {
+  const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+window.fetch = async (input, init = {}) => {
+  const method = (init.method || "GET").toUpperCase();
+  if (method !== "GET" && method !== "HEAD") {
+    init = { ...init, headers: { ...(init.headers || {}), "X-XSRF-TOKEN": csrfToken() } };
+  }
+  const res = await nativeFetch(input, init);
+  if (res.status === 401) {
+    location.replace("/login.html");
+  }
+  return res;
+};
+
 // Gezeichnete Platte als Platzhalter, wenn kein Cover vorhanden ist
 const DISC_PLACEHOLDER = `<span class="disc" aria-hidden="true"></span>`;
 
@@ -569,9 +591,11 @@ function showRefreshProgress(status) {
   refreshPricesBtns.forEach(btn => {
     btn.disabled = status.running;
     btn.classList.toggle("is-busy", status.running);
-    btn.querySelector(".refresh-label").textContent = status.running
-      ? `Aktualisiere ${status.done} von ${status.total}`
-      : "Preise aktualisieren";
+    btn.querySelector(".refresh-label").textContent = !status.running
+      ? "Preise aktualisieren"
+      : status.total
+        ? `Aktualisiere ${status.done} von ${status.total}`
+        : "Wartet auf Discogs…";
   });
 }
 
@@ -1826,6 +1850,29 @@ recordsTable.addEventListener("keydown", e => {
   openDetail(row.dataset.id);
 });
 
+async function loadAccount() {
+  try {
+    const me = await (await fetch("/api/auth/me")).json();
+    if (!me.authenticated) {
+      location.replace("/login.html");
+      return;
+    }
+    document.getElementById("account-name").textContent = me.username;
+    document.getElementById("account-avatar").textContent = me.username.charAt(0);
+  } catch (err) {
+    // Anzeige des Namens ist optional; die Daten-Aufrufe leiten bei Bedarf selbst zur Anmeldung
+  }
+}
+
+document.getElementById("logout-btn").addEventListener("click", async () => {
+  try {
+    await fetch("/api/auth/logout", { method: "POST" });
+  } finally {
+    location.replace("/login.html");
+  }
+});
+
+loadAccount();
 syncViewButtons();
 loadCollections();
 loadWishlist();

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>Anmelden · Vinyl Collector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="auth">
+  <div class="auth-card">
+    <div class="auth-art" aria-hidden="true">
+      <span class="auth-disc"></span>
+      <span class="auth-sleeve"></span>
+    </div>
+    <h1 class="auth-title">Vinyl Collector</h1>
+    <p class="auth-sub">Melde dich an, um deine Sammlung zu sehen.</p>
+
+    <form id="auth-form" class="form-grid auth-form" aria-label="Anmelden">
+      <label>
+        <span>Benutzername</span>
+        <input type="text" id="username" name="username" autocomplete="username" autocapitalize="none"
+               spellcheck="false" required maxlength="32">
+      </label>
+      <label>
+        <span>Passwort</span>
+        <input type="password" id="password" name="password" autocomplete="current-password" required maxlength="128">
+      </label>
+      <p class="auth-error" id="auth-error" role="alert" hidden></p>
+      <button type="submit" class="btn-primary auth-submit" id="auth-submit">Anmelden</button>
+    </form>
+  </div>
+</main>
+<script src="login.js"></script>
+</body>
+</html>
