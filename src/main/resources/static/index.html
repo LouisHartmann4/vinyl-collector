@@ -2,12 +2,14 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#000000">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <title>Vinyl Collector</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
@@ -17,10 +19,10 @@
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-        <circle cx="16" cy="16" r="15" fill="#1c1c1c"/>
-        <circle cx="16" cy="16" r="11.5" fill="none" stroke="#3a3a3a" stroke-width="1"/>
-        <circle cx="16" cy="16" r="8.5" fill="none" stroke="#3a3a3a" stroke-width="1"/>
-        <circle cx="16" cy="16" r="5" fill="var(--accent)"/>
+        <circle cx="16" cy="16" r="15" fill="#161616"/>
+        <circle cx="16" cy="16" r="11.5" fill="none" stroke="#333" stroke-width="1"/>
+        <circle cx="16" cy="16" r="8.5" fill="none" stroke="#333" stroke-width="1"/>
+        <circle cx="16" cy="16" r="5" fill="var(--disc-label)"/>
         <circle cx="16" cy="16" r="1.4" fill="#000"/>
       </svg>
       <span class="brand-name">Vinyl Collector</span>
@@ -28,11 +30,15 @@
 
     <nav class="nav" aria-label="Hauptnavigation">
       <button type="button" class="nav-item" id="nav-overview">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>
         Übersicht
       </button>
       <p class="nav-group">Sammlungen</p>
-      <div id="sidebar-collections"></div>
+      <div id="sidebar-collections">
+        <span class="sk-nav" aria-hidden="true"></span>
+        <span class="sk-nav" aria-hidden="true"></span>
+        <span class="sk-nav short" aria-hidden="true"></span>
+      </div>
       <button type="button" class="nav-item nav-add" id="sidebar-new-collection">
         <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Neue Sammlung
@@ -42,17 +48,21 @@
 
   <header class="topbar">
     <button type="button" class="menu-btn" id="menu-btn" aria-label="Menü öffnen" aria-expanded="false" aria-controls="sidebar">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg>
     </button>
     <div class="discogs-search" id="discogs-search">
       <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-      <input type="text" id="manual-search-input" placeholder="Discogs durchsuchen, z. B. Dream Theater – Awake" aria-label="Platte auf Discogs suchen">
+      <input type="text" id="manual-search-input" placeholder="Discogs durchsuchen, z. B. Dream Theater – Awake" aria-label="Platte auf Discogs suchen" autocomplete="off">
+      <kbd class="field-hint" aria-hidden="true">↵</kbd>
       <div class="search-pop" id="search-pop">
         <p id="manual-search-status" class="add-card-status" hidden></p>
         <div id="manual-search-results"></div>
       </div>
     </div>
-    <a href="#" id="manual-form-link" class="text-action">Manuell erfassen</a>
+    <a href="#" id="manual-form-link" class="btn-ghost" aria-label="Platte manuell erfassen">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.83 2.83 0 0 0-4-4L4 16v4z"/><line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/></svg>
+      <span class="btn-label">Manuell erfassen</span>
+    </a>
     <div class="topbar-end">
       <button type="button" class="btn-primary" id="scan-toggle" aria-label="Barcode scannen">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V4a1 1 0 0 1 1-1h3"/><path d="M17 3h3a1 1 0 0 1 1 1v3"/><path d="M21 17v3a1 1 0 0 1-1 1h-3"/><path d="M7 21H4a1 1 0 0 1-1-1v-3"/><line x1="7" y1="7" x2="7" y2="17"/><line x1="10.5" y1="7" x2="10.5" y2="17"/><line x1="14" y1="7" x2="14" y2="17"/><line x1="17.5" y1="7" x2="17.5" y2="17"/></svg>
@@ -63,7 +73,7 @@
 
   <main class="canvas">
 
-    <div id="dashboard-view">
+    <div id="dashboard-view" class="view">
 
       <div class="title-row">
         <div>
@@ -73,34 +83,62 @@
       </div>
 
       <div class="kpis">
-        <div class="kpi lead"><div class="label">Gesamtwert</div><div class="num" id="dash-stat-value">–</div></div>
+        <div class="kpi lead"><div class="label">Gesamtwert</div><div class="num" id="dash-stat-value">–</div><div class="kpi-sub" id="dash-stat-value-sub"></div></div>
         <div class="kpi"><div class="label">Platten</div><div class="num" id="dash-stat-total">0</div></div>
         <div class="kpi"><div class="label">Interpreten</div><div class="num" id="dash-stat-artists">0</div></div>
         <div class="kpi"><div class="label">Häufigstes Land</div><div class="num" id="dash-stat-country">–</div></div>
       </div>
 
-      <div class="overview-grid">
-        <section class="panel">
-          <div class="panel-head">
-            <h2>Sammlungen</h2>
-            <a href="#" id="new-collection-btn" class="text-action">Neue Sammlung</a>
+      <section class="panel trend-panel" aria-labelledby="dash-trend-heading">
+        <div class="panel-head">
+          <div>
+            <h2 id="dash-trend-heading">Wertentwicklung</h2>
+            <p class="panel-sub" id="dash-trend-sub">Lädt…</p>
           </div>
-          <div id="collections-grid" class="grid"></div>
+          <button type="button" class="btn-tinted refresh-prices-btn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-4"/><polyline points="4 3 4 7 8 7"/><path d="M4 13a8 8 0 0 0 14.9 4"/><polyline points="20 21 20 17 16 17"/></svg>
+            <span class="refresh-label">Preise aktualisieren</span>
+          </button>
+        </div>
+        <div class="trend-chart" id="dash-trend-chart"></div>
+      </section>
+
+      <div class="overview-grid">
+        <section class="panel" aria-labelledby="collections-heading">
+          <div class="panel-head">
+            <h2 id="collections-heading">Sammlungen</h2>
+            <a href="#" id="new-collection-btn" class="btn-tinted">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Neue Sammlung
+            </a>
+          </div>
+          <div id="collections-grid" class="grid">
+            <div class="sk-tile" aria-hidden="true"><div class="sk-cover"></div><span class="sk-line"></span><span class="sk-line short"></span></div>
+            <div class="sk-tile" aria-hidden="true"><div class="sk-cover"></div><span class="sk-line"></span><span class="sk-line short"></span></div>
+            <div class="sk-tile" aria-hidden="true"><div class="sk-cover"></div><span class="sk-line"></span><span class="sk-line short"></span></div>
+          </div>
         </section>
 
-        <section class="panel">
+        <section class="panel wish-panel" aria-labelledby="wishlist-heading">
           <div class="panel-head">
-            <h2>Wunschliste</h2>
-            <a href="#" id="wishlist-search-btn" class="text-action">Von Discogs hinzufügen</a>
+            <h2 id="wishlist-heading">Wunschliste</h2>
+            <a href="#" id="wishlist-search-btn" class="btn-tinted">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Von Discogs
+            </a>
           </div>
-          <div id="wishlist-list" class="wish-grid"></div>
+          <div id="wishlist-list" class="wish-grid">
+            <div class="sk-row" aria-hidden="true"><span class="sk-art"></span><span class="sk-lines"><span class="sk-line"></span><span class="sk-line short"></span></span></div>
+            <div class="sk-row" aria-hidden="true"><span class="sk-art"></span><span class="sk-lines"><span class="sk-line"></span><span class="sk-line short"></span></span></div>
+            <div class="sk-row" aria-hidden="true"><span class="sk-art"></span><span class="sk-lines"><span class="sk-line"></span><span class="sk-line short"></span></span></div>
+          </div>
           <p id="wishlist-empty-state" class="empty-note" hidden>Noch keine Wunsch-Platten. Suche auf Discogs und merke dir, was dir fehlt.</p>
         </section>
       </div>
 
     </div>
 
-    <div id="collection-view" hidden>
+    <div id="collection-view" class="view" hidden>
 
       <div class="title-row">
         <div>
@@ -110,29 +148,59 @@
           </a>
           <h1 id="collection-title">Sammlung</h1>
         </div>
-        <button type="button" class="btn-primary" id="add-record-btn">Platte hinzufügen</button>
+        <button type="button" class="btn-primary" id="add-record-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Platte hinzufügen
+        </button>
       </div>
 
       <div class="kpis">
-        <div class="kpi lead"><div class="label">Gesamtwert</div><div class="num" id="coll-stat-value">–</div></div>
+        <div class="kpi lead"><div class="label">Gesamtwert</div><div class="num" id="coll-stat-value">–</div><div class="kpi-sub" id="coll-stat-value-sub"></div></div>
         <div class="kpi"><div class="label">Platten</div><div class="num" id="coll-stat-total">0</div></div>
         <div class="kpi"><div class="label">Interpreten</div><div class="num" id="coll-stat-artists">0</div></div>
         <div class="kpi"><div class="label">Häufigstes Land</div><div class="num" id="coll-stat-country">–</div></div>
       </div>
+
+      <section class="panel trend-panel" aria-labelledby="coll-trend-heading">
+        <div class="panel-head">
+          <div>
+            <h2 id="coll-trend-heading">Wertentwicklung</h2>
+            <p class="panel-sub" id="coll-trend-sub">Lädt…</p>
+          </div>
+          <button type="button" class="btn-tinted refresh-prices-btn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-4"/><polyline points="4 3 4 7 8 7"/><path d="M4 13a8 8 0 0 0 14.9 4"/><polyline points="20 21 20 17 16 17"/></svg>
+            <span class="refresh-label">Preise aktualisieren</span>
+          </button>
+        </div>
+        <div class="trend-chart" id="coll-trend-chart"></div>
+      </section>
 
       <div class="toolbar">
         <div class="search-wrap">
           <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
           <input type="search" id="search" placeholder="In dieser Sammlung suchen" aria-label="In dieser Sammlung suchen">
         </div>
-        <button type="button" class="btn-outline filter-toggle-btn" id="filter-toggle-btn">
+        <button type="button" class="btn-outline filter-toggle-btn" id="filter-toggle-btn" aria-controls="filter-panel" aria-expanded="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="17" x2="14" y2="17"/></svg>
           Filter
         </button>
         <button type="button" class="btn-outline icon-only" id="scan-toggle-collection" aria-label="Barcode scannen" title="Barcode scannen">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V4a1 1 0 0 1 1-1h3"/><path d="M17 3h3a1 1 0 0 1 1 1v3"/><path d="M21 17v3a1 1 0 0 1-1 1h-3"/><path d="M7 21H4a1 1 0 0 1-1-1v-3"/><line x1="7" y1="7" x2="7" y2="17"/><line x1="10.5" y1="7" x2="10.5" y2="17"/><line x1="14" y1="7" x2="14" y2="17"/><line x1="17.5" y1="7" x2="17.5" y2="17"/></svg>
         </button>
-        <button type="button" class="btn-danger-text delete-all-btn" id="delete-all-btn">Alle löschen</button>
+        <div class="segmented" role="group" aria-label="Darstellung">
+          <button type="button" class="seg-btn" id="view-grid-btn" aria-pressed="true" title="Cover-Ansicht">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
+            <span class="sr-only">Cover-Ansicht</span>
+          </button>
+          <button type="button" class="seg-btn" id="view-list-btn" aria-pressed="false" title="Listenansicht">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>
+            <span class="sr-only">Listenansicht</span>
+          </button>
+        </div>
+        <button type="button" class="btn-danger-text delete-all-btn" id="delete-all-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/></svg>
+          Alle löschen
+        </button>
       </div>
 
       <div class="filter-panel" id="filter-panel" hidden>
@@ -190,6 +258,8 @@
       </div>
 
       <div id="records-grid" class="rec-grid"></div>
+      <div id="records-table" class="table-wrap" hidden></div>
+      <p id="no-results" class="empty-note no-results" hidden>Keine Platte passt zu Suche und Filtern.</p>
       <p id="empty-state" class="empty-note" hidden>Noch keine Platten in dieser Sammlung. Scanne einen Barcode oder suche oben auf Discogs.</p>
 
     </div>
@@ -199,89 +269,125 @@
         <input type="hidden" id="record-id">
         <input type="hidden" id="barcode">
         <input type="hidden" id="discogs-release-id">
-        <h2>Platte erfassen</h2>
-        <div class="form-grid">
-          <label>
+        <div class="form-head">
+          <div>
+            <h2>Platte erfassen</h2>
+            <p class="form-hint">Interpret und Titel sind Pflichtfelder.</p>
+          </div>
+          <label class="form-target">
             <span>Sammlung</span>
             <select id="record-collection" required></select>
           </label>
-          <label>
-            <span>Interpret</span>
-            <input type="text" id="artist" required placeholder="z. B. Pink Floyd">
-          </label>
-          <label>
-            <span>Titel</span>
-            <input type="text" id="title" required placeholder="z. B. The Dark Side of the Moon">
-          </label>
-          <label>
-            <span>Genre</span>
-            <select id="genre">
-              <option value="Rock">Rock</option>
-              <option value="Pop">Pop</option>
-              <option value="Jazz">Jazz</option>
-              <option value="Electronic">Electronic</option>
-              <option value="Hip-Hop">Hip-Hop</option>
-              <option value="Klassik">Klassik</option>
-              <option value="Soul/Funk">Soul/Funk</option>
-              <option value="Sonstiges">Sonstiges</option>
-            </select>
-          </label>
-          <label>
-            <span>Erscheinungsjahr</span>
-            <input type="number" id="releaseYear" min="1900" max="2100" step="1" placeholder="z. B. 1973">
-          </label>
-          <label>
-            <span>Format</span>
-            <select id="format">
-              <option value="LP">LP</option>
-              <option value="EP">EP</option>
-              <option value="Single/Maxi">Single/Maxi</option>
-              <option value="Box-Set">Box-Set</option>
-            </select>
-          </label>
-          <label>
-            <span>Zustand</span>
-            <select id="condition">
-              <option value="Mint (M)">Mint (M)</option>
-              <option value="Near Mint (NM)">Near Mint (NM)</option>
-              <option value="Sehr gut+ (VG+)">Sehr gut+ (VG+)</option>
-              <option value="Sehr gut (VG)">Sehr gut (VG)</option>
-              <option value="Gut (G)">Gut (G)</option>
-              <option value="Befriedigend (F)">Befriedigend (F)</option>
-            </select>
-          </label>
-          <label>
-            <span>Styles</span>
-            <input type="text" id="styles" placeholder="z. B. Prog Rock, Psychedelic Rock">
-          </label>
-          <label>
-            <span>Land</span>
-            <input type="text" id="country" placeholder="z. B. UK">
-          </label>
-          <label>
-            <span>Label</span>
-            <input type="text" id="label" placeholder="z. B. DGC">
-          </label>
-          <label>
-            <span>Katalognummer</span>
-            <input type="text" id="catalogNumber" placeholder="z. B. 424 425-1">
-          </label>
-          <label>
-            <span>Cover-Bild-URL</span>
-            <input type="url" id="coverImageUrl" placeholder="https://...">
-          </label>
-          <label class="notes-field">
-            <span>Notizen</span>
-            <input type="text" id="notes" placeholder="z. B. limitierte Auflage, Kratzer auf Seite B">
-          </label>
-          <label class="notes-field">
-            <span>Tracklist</span>
-            <textarea id="tracklist" rows="4" placeholder="z. B.&#10;A1 Speak to Me (1:30)&#10;A2 Breathe (2:43)"></textarea>
-          </label>
         </div>
+        <div id="duplicate-hint" class="dup-hint" role="status" hidden></div>
+        <fieldset class="form-group">
+          <legend>Grunddaten</legend>
+          <div class="form-grid">
+            <label class="span-2">
+              <span>Interpret</span>
+              <input type="text" id="artist" required placeholder="z. B. Pink Floyd">
+            </label>
+            <label class="span-2">
+              <span>Titel</span>
+              <input type="text" id="title" required placeholder="z. B. The Dark Side of the Moon">
+            </label>
+            <label>
+              <span>Genre</span>
+              <select id="genre">
+                <option value="Rock">Rock</option>
+                <option value="Pop">Pop</option>
+                <option value="Jazz">Jazz</option>
+                <option value="Electronic">Electronic</option>
+                <option value="Hip-Hop">Hip-Hop</option>
+                <option value="Klassik">Klassik</option>
+                <option value="Soul/Funk">Soul/Funk</option>
+                <option value="Sonstiges">Sonstiges</option>
+              </select>
+            </label>
+            <label>
+              <span>Erscheinungsjahr</span>
+              <input type="number" id="releaseYear" min="1900" max="2100" step="1" placeholder="z. B. 1973">
+            </label>
+            <label>
+              <span>Format</span>
+              <select id="format">
+                <option value="LP">LP</option>
+                <option value="EP">EP</option>
+                <option value="Single/Maxi">Single/Maxi</option>
+                <option value="Box-Set">Box-Set</option>
+              </select>
+            </label>
+            <label>
+              <span>Zustand</span>
+              <select id="condition">
+                <option value="Mint (M)">Mint (M)</option>
+                <option value="Near Mint (NM)">Near Mint (NM)</option>
+                <option value="Sehr gut+ (VG+)">Sehr gut+ (VG+)</option>
+                <option value="Sehr gut (VG)">Sehr gut (VG)</option>
+                <option value="Gut (G)">Gut (G)</option>
+                <option value="Befriedigend (F)">Befriedigend (F)</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+        <fieldset class="form-group">
+          <legend>Pressung</legend>
+          <div class="form-grid">
+            <label class="span-2">
+              <span>Styles</span>
+              <input type="text" id="styles" placeholder="z. B. Prog Rock, Psychedelic Rock">
+            </label>
+            <label>
+              <span>Land</span>
+              <input type="text" id="country" placeholder="z. B. UK">
+            </label>
+            <label>
+              <span>Label</span>
+              <input type="text" id="label" placeholder="z. B. DGC">
+            </label>
+            <label>
+              <span>Katalognummer</span>
+              <input type="text" id="catalogNumber" placeholder="z. B. 424 425-1">
+            </label>
+            <label class="span-3">
+              <span>Cover-Bild-URL</span>
+              <input type="url" id="coverImageUrl" placeholder="https://...">
+            </label>
+          </div>
+        </fieldset>
+        <fieldset class="form-group">
+          <legend>Kauf</legend>
+          <div class="form-grid">
+            <label>
+              <span>Kaufpreis</span>
+              <input type="number" id="purchasePrice" min="0" step="0.01" inputmode="decimal" placeholder="z. B. 24,99">
+            </label>
+            <label>
+              <span>Kaufdatum</span>
+              <input type="date" id="purchaseDate">
+            </label>
+            <label class="span-2">
+              <span>Gekauft bei</span>
+              <input type="text" id="purchaseSource" placeholder="z. B. Plattenladen, Discogs, Flohmarkt">
+            </label>
+          </div>
+        </fieldset>
+        <fieldset class="form-group">
+          <legend>Notizen &amp; Tracklist</legend>
+          <div class="form-grid">
+            <label class="notes-field">
+              <span>Notizen</span>
+              <input type="text" id="notes" placeholder="z. B. limitierte Auflage, Kratzer auf Seite B">
+            </label>
+            <label class="notes-field">
+              <span>Tracklist</span>
+              <textarea id="tracklist" rows="4" placeholder="z. B.&#10;A1 Speak to Me (1:30)&#10;A2 Breathe (2:43)"></textarea>
+            </label>
+          </div>
+        </fieldset>
         <div class="actions">
-          <button type="submit" class="btn-primary" id="submit-btn">Hinzufügen</button>
           <button type="button" id="cancel-btn" class="btn-outline secondary">Abbrechen</button>
+          <button type="submit" class="btn-primary" id="submit-btn">Hinzufügen</button>
         </div>
       </form>
       <p id="no-target-collection-hint" class="add-card-status" hidden>Lege zuerst eine Sammlung an, um Platten hinzuzufügen.</p>
@@ -298,7 +404,7 @@
     <div id="scan-results" class="scan-results" hidden></div>
     <button type="button" class="btn-outline secondary manual-entry-btn" id="manual-entry-btn" hidden>Barcode manuell eingeben</button>
     <div id="manual-entry-form" class="manual-entry-form" hidden>
-      <input type="text" id="manual-barcode-input" placeholder="Barcode eingeben" aria-label="Barcode">
+      <input type="text" id="manual-barcode-input" placeholder="Barcode eingeben" aria-label="Barcode" inputmode="numeric" autocomplete="off">
       <button type="button" class="btn-primary" id="manual-entry-submit">Suchen</button>
     </div>
     <div class="modal-actions">
@@ -311,7 +417,7 @@
   <div class="modal scan-modal" role="dialog" aria-modal="true" aria-labelledby="wishlist-modal-title">
     <h3 id="wishlist-modal-title">Zur Wunschliste hinzufügen</h3>
     <div class="manual-entry-form">
-      <input type="text" id="wishlist-search-input" placeholder="Interpret, Titel, ..." aria-label="Discogs-Suche">
+      <input type="text" id="wishlist-search-input" placeholder="Interpret, Titel, ..." aria-label="Discogs-Suche" autocomplete="off">
       <button type="button" class="btn-primary" id="wishlist-search-submit">Suchen</button>
     </div>
     <p id="wishlist-search-status" class="scan-status" hidden></p>
@@ -323,9 +429,9 @@
 </div>
 
 <div id="collection-modal" class="modal-overlay" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="collection-modal-title">
+  <div class="modal modal-compact" role="dialog" aria-modal="true" aria-labelledby="collection-modal-title">
     <h3 id="collection-modal-title">Neue Sammlung</h3>
-    <input type="text" id="collection-name-input" placeholder="z. B. Jazz-Ecke" aria-label="Name der neuen Sammlung" class="modal-field">
+    <input type="text" id="collection-name-input" placeholder="z. B. Jazz-Ecke" aria-label="Name der neuen Sammlung" class="modal-field" autocomplete="off">
     <div class="modal-actions">
       <button type="button" class="btn-outline secondary" id="collection-cancel">Abbrechen</button>
       <button type="button" class="btn-primary" id="collection-create">Erstellen</button>
@@ -334,7 +440,7 @@
 </div>
 
 <div id="promote-modal" class="modal-overlay" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="promote-modal-title">
+  <div class="modal modal-compact" role="dialog" aria-modal="true" aria-labelledby="promote-modal-title">
     <h3 id="promote-modal-title">In welche Sammlung übernehmen?</h3>
     <select id="promote-select" class="modal-field" aria-label="Sammlung"></select>
     <div class="modal-actions">
@@ -347,14 +453,17 @@
 <div id="detail-modal" class="modal-overlay" hidden>
   <div class="modal detail-modal" role="dialog" aria-modal="true" aria-label="Plattendetails">
     <button type="button" class="detail-close" id="detail-close" aria-label="Schließen">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="7" y1="7" x2="17" y2="17"/><line x1="17" y1="7" x2="7" y2="17"/></svg>
     </button>
     <div id="detail-content"></div>
   </div>
 </div>
 
 <div id="confirm-modal" class="modal-overlay" hidden>
-  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-text">
+  <div class="modal modal-compact confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-text">
+    <span class="confirm-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/></svg>
+    </span>
     <p id="confirm-text">Diesen Eintrag löschen?</p>
     <div class="modal-actions">
       <button type="button" class="btn-outline secondary" id="confirm-cancel">Abbrechen</button>

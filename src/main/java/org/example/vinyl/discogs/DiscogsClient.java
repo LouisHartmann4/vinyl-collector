@@ -60,7 +60,8 @@ public class DiscogsClient {
             return List.of();
         }
         return response.results().stream()
-                .map(r -> new DiscogsSearchResult(r.id(), r.title(), parseYear(r.year()), r.thumb(), r.coverImage(), r.catno()))
+                .map(r -> new DiscogsSearchResult(r.id(), r.title(), parseYear(r.year()), r.thumb(), r.coverImage(), r.catno(),
+                        r.country(), r.format(), r.label()))
                 .toList();
     }
 
@@ -237,7 +238,8 @@ public class DiscogsClient {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record SearchResultRaw(long id, String title, String year, String thumb,
-                                    @JsonProperty("cover_image") String coverImage, String catno) {
+                                    @JsonProperty("cover_image") String coverImage, String catno,
+                                    String country, List<String> format, List<String> label) {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

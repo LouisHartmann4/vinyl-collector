@@ -1,6 +1,9 @@
 // Gezeichnete Platte als Platzhalter, wenn kein Cover vorhanden ist
 const DISC_PLACEHOLDER = `<span class="disc" aria-hidden="true"></span>`;
 
+// Platzhalter-Kacheln, solange die Platten einer Sammlung geladen werden
+const RECORD_SKELETONS = `<div class="rec-skeleton" aria-hidden="true"><div class="cover"></div><span class="sk-line"></span><span class="sk-line short"></span></div>`.repeat(6);
+
 const form = document.getElementById("record-form");
 const formCard = document.getElementById("form-card");
 const formToggle = document.getElementById("add-record-btn");
@@ -97,6 +100,21 @@ const navOverview = document.getElementById("nav-overview");
 const sidebarNewCollection = document.getElementById("sidebar-new-collection");
 const menuBtn = document.getElementById("menu-btn");
 const discogsSearch = document.getElementById("discogs-search");
+const dashStatValueSub = document.getElementById("dash-stat-value-sub");
+const collStatValueSub = document.getElementById("coll-stat-value-sub");
+const dashTrendChart = document.getElementById("dash-trend-chart");
+const dashTrendSub = document.getElementById("dash-trend-sub");
+const collTrendChart = document.getElementById("coll-trend-chart");
+const collTrendSub = document.getElementById("coll-trend-sub");
+const refreshPricesBtns = document.querySelectorAll(".refresh-prices-btn");
+const viewGridBtn = document.getElementById("view-grid-btn");
+const viewListBtn = document.getElementById("view-list-btn");
+const recordsTable = document.getElementById("records-table");
+const noResults = document.getElementById("no-results");
+const duplicateHint = document.getElementById("duplicate-hint");
+const purchasePriceField = document.getElementById("purchasePrice");
+const purchaseDateField = document.getElementById("purchaseDate");
+const purchaseSourceField = document.getElementById("purchaseSource");
 
 let records = [];
 let dashboardRecords = [];
@@ -109,6 +127,12 @@ let toastTimer = null;
 let html5QrCode = null;
 let manualEntryTimer = null;
 let promotingWishlistItemId = null;
+let ownedRecords = null;
+let viewMode = localStorage.getItem("vinyl-view-mode") === "list" ? "list" : "grid";
+let sortKey = "artist";
+let sortDir = 1;
+let refreshPollTimer = null;
+let chartGradientId = 0;
 
 function recordsApiUrl() {
   return `/api/collections/${currentCollectionId}/records`;
@@ -120,6 +144,7 @@ function generalCollectionId() {
 }
 
 async function loadCollections() {
+  ownedRecords = null;
   const res = await fetch("/api/collections");
   collections = await res.json();
 
@@ -143,26 +168,15 @@ async function loadDashboardStats() {
   if (!generalId) return;
   const res = await fetch(`/api/collections/${generalId}/records`);
   dashboardRecords = await res.json();
+  ownedRecords = dashboardRecords;
+
+  renderStats(dashboardRecords, {
+    total: dashStatTotal, artists: dashStatArtists, country: dashStatCountry,
+    value: dashStatValue, valueSub: dashStatValueSub,
+  });
+  loadValueHistory(generalId, dashTrendChart, dashTrendSub);
 
   const total = dashboardRecords.length;
-  const artists = new Set(dashboardRecords.map(r => r.artist.trim().toLowerCase())).size;
-
-  const countryCounts = {};
-  dashboardRecords.forEach(r => {
-    if (r.country) countryCounts[r.country] = (countryCounts[r.country] || 0) + 1;
-  });
-  const topCountry = Object.entries(countryCounts).sort((a, b) => b[1] - a[1])[0];
-
-  const priced = dashboardRecords.filter(r => r.lastKnownPrice != null);
-  const avgPrice = priced.length ? priced.reduce((sum, r) => sum + r.lastKnownPrice, 0) / priced.length : null;
-  const totalValue = avgPrice != null ? avgPrice * total : null;
-  const currency = priced.length ? (priced[0].lastKnownPriceCurrency || "") : "";
-
-  dashStatTotal.textContent = total;
-  dashStatArtists.textContent = artists;
-  dashStatCountry.textContent = topCountry ? topCountry[0] : "–";
-  dashStatValue.textContent = totalValue != null ? `${totalValue.toFixed(2)} ${currency}` : "–";
-
   const ownCollections = collections.filter(c => c.deletable).length;
   heroSubtitle.textContent = `${total} ${total === 1 ? "Platte" : "Platten"} in ${ownCollections} ${ownCollections === 1 ? "Sammlung" : "Sammlungen"}`;
 }
@@ -283,6 +297,10 @@ async function openCollectionView(id) {
   resetForm();
   dashboardView.hidden = true;
   collectionView.hidden = false;
+  recordsGrid.innerHTML = RECORD_SKELETONS;
+  recordsTable.innerHTML = "";
+  emptyState.hidden = true;
+  noResults.hidden = true;
   renderCollectionsGrid();
   renderRecordCollectionOptions();
   await loadRecords();
@@ -346,24 +364,265 @@ function renderCollectionStats() {
   const current = collections.find(c => String(c.id) === String(currentCollectionId));
   collectionTitle.textContent = current ? current.name : "Sammlung";
 
-  const total = records.length;
-  const artists = new Set(records.map(r => r.artist.trim().toLowerCase())).size;
+  renderStats(records, {
+    total: collStatTotal, artists: collStatArtists, country: collStatCountry,
+    value: collStatValue, valueSub: collStatValueSub,
+  });
+  loadValueHistory(currentCollectionId, collTrendChart, collTrendSub);
+}
+
+function renderStats(list, el) {
+  const artists = new Set(list.map(r => r.artist.trim().toLowerCase())).size;
 
   const countryCounts = {};
-  records.forEach(r => {
+  list.forEach(r => {
     if (r.country) countryCounts[r.country] = (countryCounts[r.country] || 0) + 1;
   });
   const topCountry = Object.entries(countryCounts).sort((a, b) => b[1] - a[1])[0];
 
-  const priced = records.filter(r => r.lastKnownPrice != null);
-  const avgPrice = priced.length ? priced.reduce((sum, r) => sum + r.lastKnownPrice, 0) / priced.length : null;
-  const totalValue = avgPrice != null ? avgPrice * total : null;
-  const currency = priced.length ? (priced[0].lastKnownPriceCurrency || "") : "";
+  el.total.textContent = list.length;
+  el.artists.textContent = artists;
+  el.country.textContent = topCountry ? topCountry[0] : "–";
 
-  collStatTotal.textContent = total;
-  collStatArtists.textContent = artists;
-  collStatCountry.textContent = topCountry ? topCountry[0] : "–";
-  collStatValue.textContent = totalValue != null ? `${totalValue.toFixed(2)} ${currency}` : "–";
+  // Summe der bekannten Marktpreise; Platten ohne Preis zählen nicht mit
+  const priced = list.filter(r => r.lastKnownPrice != null);
+  const currency = priced.length ? (priced[0].lastKnownPriceCurrency || "EUR") : "EUR";
+  const value = priced.reduce((sum, r) => sum + r.lastKnownPrice, 0);
+  el.value.textContent = priced.length ? formatMoney(value, currency) : "–";
+
+  const notes = [];
+  const unpriced = list.length - priced.length;
+  if (unpriced > 0) notes.push(`<span>${unpriced} ohne Marktpreis</span>`);
+
+  // Gewinn/Verlust nur über Platten, bei denen Kaufpreis und Marktwert bekannt sind
+  const compared = priced.filter(r => r.purchasePrice != null);
+  if (compared.length) {
+    const paid = compared.reduce((sum, r) => sum + r.purchasePrice, 0);
+    const worth = compared.reduce((sum, r) => sum + r.lastKnownPrice, 0);
+    notes.push(`<span title="Kaufpreis der ${compared.length} Platten mit bekanntem Marktwert">Bezahlt ${escapeHtml(formatMoney(paid, currency))} ${gainBadge(worth - paid, paid, currency)}</span>`);
+  }
+  el.valueSub.innerHTML = notes.join("");
+}
+
+function formatMoney(value, currency) {
+  try {
+    return new Intl.NumberFormat("de-DE", { style: "currency", currency: currency || "EUR" }).format(value);
+  } catch (err) {
+    return `${value.toFixed(2)} ${currency || ""}`.trim();
+  }
+}
+
+function formatDate(isoDate) {
+  return new Date(`${isoDate}T00:00:00`).toLocaleDateString("de-DE", { day: "numeric", month: "short", year: "numeric" });
+}
+
+// Veränderung mit Vorzeichen, damit Gewinn und Verlust nicht nur an der Farbe erkennbar sind
+function gainBadge(delta, base, currency) {
+  const kind = delta > 0.005 ? "gain" : delta < -0.005 ? "loss" : "flat";
+  const sign = kind === "gain" ? "+" : kind === "loss" ? "−" : "±";
+  const pct = base > 0
+    ? ` (${sign}${Math.abs((delta / base) * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %)`
+    : "";
+  return `<span class="delta ${kind}">${sign}${escapeHtml(formatMoney(Math.abs(delta), currency))}${pct}</span>`;
+}
+
+// ---------- Wertentwicklung ----------
+
+async function loadValueHistory(collectionId, chartEl, subEl) {
+  try {
+    const res = await fetch(`/api/collections/${collectionId}/value-history`);
+    if (!res.ok) throw new Error("Wertverlauf nicht verfügbar");
+    renderValueHistory(await res.json(), chartEl, subEl);
+  } catch (err) {
+    subEl.textContent = "Wertverlauf konnte nicht geladen werden.";
+    chartEl.innerHTML = "";
+  }
+}
+
+function renderValueHistory(history, chartEl, subEl) {
+  const points = history.points || [];
+  const currency = history.currency || "EUR";
+  chartEl.history = points.length ? { points, currency } : null;
+
+  if (points.length === 0) {
+    subEl.textContent = "Noch keine Marktpreise. Platten mit Discogs-Verknüpfung bekommen automatisch einen Preis.";
+    chartEl.innerHTML = "";
+    return;
+  }
+  const first = points[0];
+  const last = points[points.length - 1];
+  subEl.innerHTML = points.length === 1
+    ? `${escapeHtml(formatMoney(last.value, currency))} am ${formatDate(last.date)}. Der Verlauf erscheint ab der nächsten täglichen Aktualisierung.`
+    : `${gainBadge(last.value - first.value, first.value, currency)} seit ${formatDate(first.date)}`;
+  // ein einzelner Punkt ist noch kein Verlauf
+  if (points.length === 1) {
+    chartEl.history = null;
+    chartEl.innerHTML = "";
+    return;
+  }
+  drawValueChart(chartEl);
+}
+
+function drawValueChart(chartEl) {
+  const { points, currency } = chartEl.history;
+  const width = Math.max(chartEl.clientWidth, 280);
+  const height = 168;
+  const padX = 4;
+  const padTop = 22;
+  const padBottom = 26;
+  const plotW = width - padX * 2;
+  const plotH = height - padTop - padBottom;
+
+  const times = points.map(p => new Date(`${p.date}T00:00:00`).getTime());
+  const t0 = times[0];
+  const t1 = times[times.length - 1];
+  const values = points.map(p => p.value);
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const margin = (maxValue - minValue || Math.max(maxValue * 0.1, 1)) * 0.25;
+  const lo = Math.max(0, minValue - margin);
+  const hi = maxValue + margin;
+
+  const x = i => padX + (t1 === t0 ? plotW / 2 : ((times[i] - t0) / (t1 - t0)) * plotW);
+  const y = v => padTop + (1 - (v - lo) / (hi - lo)) * plotH;
+
+  const line = points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(" ");
+  const area = `${line} L${x(points.length - 1).toFixed(1)},${padTop + plotH} L${x(0).toFixed(1)},${padTop + plotH} Z`;
+  const gradientId = `trend-fill-${++chartGradientId}`;
+  const lastIndex = points.length - 1;
+
+  const dots = points.map((p, i) => `
+    <circle cx="${x(i)}" cy="${y(p.value)}" r="${i === lastIndex ? 4.5 : points.length <= 40 ? 2.5 : 0}" class="${i === lastIndex ? "trend-dot last" : "trend-dot"}">
+      <title>${formatDate(p.date)}: ${escapeHtml(formatMoney(p.value, currency))} (${p.pricedCount} ${p.pricedCount === 1 ? "Platte" : "Platten"} mit Preis)</title>
+    </circle>`).join("");
+
+  const dateLabels = t1 === t0
+    ? `<text x="${width / 2}" y="${height - 6}" text-anchor="middle">${formatDate(points[0].date)}</text>`
+    : `<text x="${padX}" y="${height - 6}">${formatDate(points[0].date)}</text>
+       <text x="${width - padX}" y="${height - 6}" text-anchor="end">${formatDate(points[lastIndex].date)}</text>`;
+
+  chartEl.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img"
+      aria-label="Wertentwicklung von ${escapeHtml(formatMoney(points[0].value, currency))} auf ${escapeHtml(formatMoney(points[lastIndex].value, currency))}">
+      <defs>
+        <linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.22"/>
+          <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="${padX}" y1="${y(maxValue)}" x2="${width - padX}" y2="${y(maxValue)}" class="trend-grid"/>
+      ${maxValue !== minValue ? `<line x1="${padX}" y1="${y(minValue)}" x2="${width - padX}" y2="${y(minValue)}" class="trend-grid"/>` : ""}
+      <text x="${padX}" y="${y(maxValue) - 7}">${escapeHtml(formatMoney(maxValue, currency))}</text>
+      ${maxValue !== minValue ? `<text x="${padX}" y="${y(minValue) - 7}">${escapeHtml(formatMoney(minValue, currency))}</text>` : ""}
+      ${points.length > 1 ? `<path d="${area}" fill="url(#${gradientId})"/><path d="${line}" class="trend-line"/>` : ""}
+      ${dots}
+      ${dateLabels}
+    </svg>
+  `;
+}
+
+// Diagramme an die verfügbare Breite anpassen, z. B. beim Drehen des Geräts oder Einblenden der Ansicht
+const chartResizeObserver = new ResizeObserver(entries => {
+  entries.forEach(entry => {
+    const chartEl = entry.target;
+    const svg = chartEl.querySelector("svg");
+    if (chartEl.history && chartEl.clientWidth && (!svg || Number(svg.getAttribute("width")) !== Math.max(chartEl.clientWidth, 280))) {
+      drawValueChart(chartEl);
+    }
+  });
+});
+[dashTrendChart, collTrendChart].forEach(el => chartResizeObserver.observe(el));
+
+// ---------- Preise aktualisieren ----------
+
+async function startPriceRefresh() {
+  try {
+    const res = await fetch("/api/prices/refresh", { method: "POST" });
+    if (!res.ok) throw new Error("Aktualisierung fehlgeschlagen");
+    const status = await res.json();
+    showRefreshProgress(status);
+    if (status.running) pollPriceRefresh();
+  } catch (err) {
+    showToast("Preise konnten nicht aktualisiert werden", "error");
+  }
+}
+
+function pollPriceRefresh() {
+  clearTimeout(refreshPollTimer);
+  refreshPollTimer = setTimeout(async () => {
+    try {
+      const status = await (await fetch("/api/prices/refresh")).json();
+      showRefreshProgress(status);
+      if (status.running) {
+        pollPriceRefresh();
+        return;
+      }
+      await loadCollections();
+      showToast(status.failed ? `Preise aktualisiert, ${status.failed} nicht erreichbar` : "Preise aktualisiert");
+    } catch (err) {
+      showRefreshProgress({ running: false });
+    }
+  }, 2000);
+}
+
+function showRefreshProgress(status) {
+  refreshPricesBtns.forEach(btn => {
+    btn.disabled = status.running;
+    btn.classList.toggle("is-busy", status.running);
+    btn.querySelector(".refresh-label").textContent = status.running
+      ? `Aktualisiere ${status.done} von ${status.total}`
+      : "Preise aktualisieren";
+  });
+}
+
+async function resumePriceRefresh() {
+  try {
+    const status = await (await fetch("/api/prices/refresh")).json();
+    if (status.running) {
+      showRefreshProgress(status);
+      pollPriceRefresh();
+    }
+  } catch (err) {
+    // Status ist nur eine Anzeige; ohne ihn bleibt der Knopf bedienbar
+  }
+}
+
+// ---------- Doppelte Platten erkennen ----------
+
+async function getOwnedRecords() {
+  if (ownedRecords) return ownedRecords;
+  const generalId = generalCollectionId();
+  if (!generalId) return [];
+  try {
+    ownedRecords = await (await fetch(`/api/collections/${generalId}/records`)).json();
+  } catch (err) {
+    return [];
+  }
+  return ownedRecords;
+}
+
+function findOwned(owned, releaseId, barcode) {
+  return owned.find(r =>
+    (releaseId && String(r.discogsReleaseId) === String(releaseId)) || (barcode && r.barcode === barcode)
+  ) || null;
+}
+
+function collectionNameOf(record) {
+  const collection = collections.find(c => String(c.id) === String(record.collectionId));
+  return collection ? collection.name : "Alle Platten";
+}
+
+function ownedBadge(record) {
+  return record ? `<span class="owned-badge">In ${escapeHtml(collectionNameOf(record))}</span>` : "";
+}
+
+async function showDuplicateHint(releaseId, barcode) {
+  duplicateHint.hidden = true;
+  if (idField.value) return;
+  const match = findOwned(await getOwnedRecords(), releaseId, barcode);
+  if (!match || idField.value) return;
+  duplicateHint.innerHTML = `<strong>Hast du schon:</strong> „${escapeHtml(match.title)}“ von ${escapeHtml(match.artist)} in ${escapeHtml(collectionNameOf(match))}${match.condition ? `, Zustand ${escapeHtml(match.condition)}` : ""}. Speichern legt ein weiteres Exemplar an.`;
+  duplicateHint.hidden = false;
 }
 
 const SEARCHABLE_FIELDS = [
@@ -394,42 +653,72 @@ function hasActiveFilters() {
     filterCountry.value || filterYearFrom.value || filterYearTo.value);
 }
 
+const CONDITION_ORDER = ["Mint (M)", "Near Mint (NM)", "Sehr gut+ (VG+)", "Sehr gut (VG)", "Gut (G)", "Befriedigend (F)"];
+
+const SORT_VALUES = {
+  title: r => r.title,
+  artist: r => r.artist,
+  releaseYear: r => r.releaseYear,
+  genre: r => r.genre,
+  condition: r => (CONDITION_ORDER.includes(r.condition) ? CONDITION_ORDER.indexOf(r.condition) : null),
+  country: r => r.country,
+  lastKnownPrice: r => r.lastKnownPrice,
+  purchasePrice: r => r.purchasePrice,
+};
+
+function compareRecords(a, b) {
+  const va = SORT_VALUES[sortKey](a);
+  const vb = SORT_VALUES[sortKey](b);
+  const emptyA = va == null || va === "";
+  const emptyB = vb == null || vb === "";
+  // leere Werte stehen unabhängig von der Richtung immer am Ende
+  if (emptyA !== emptyB) return emptyA ? 1 : -1;
+  const result = emptyA ? 0 : typeof va === "number" ? va - vb : String(va).localeCompare(String(vb), "de");
+  return result * sortDir || a.artist.localeCompare(b.artist) || a.title.localeCompare(b.title);
+}
+
 function renderRecords() {
   const query = searchField.value.trim().toLowerCase();
   const filtered = records.filter(r => matchesQuery(r, query) && matchesFilters(r));
+  const sorted = filtered.sort(compareRecords);
   filterToggleBtn.classList.toggle("active", hasActiveFilters());
 
   recordsGrid.innerHTML = "";
   emptyState.hidden = records.length > 0;
+  noResults.hidden = records.length === 0 || filtered.length > 0;
+  recordsGrid.hidden = viewMode !== "grid";
+  recordsTable.hidden = viewMode !== "list" || filtered.length === 0;
 
-  filtered
-    .slice()
-    .sort((a, b) => a.artist.localeCompare(b.artist) || a.title.localeCompare(b.title))
-    .forEach(record => {
-      const tile = document.createElement("div");
-      tile.className = "rec-tile";
-      tile.tabIndex = 0;
-      tile.setAttribute("role", "button");
-      tile.setAttribute("aria-label", `${record.artist} – ${record.title}`);
-      tile.innerHTML = `
-        <div class="cover${record.coverImageUrl ? " has-image" : ""}"${record.coverImageUrl ? ` style="background-image:url('${record.coverImageUrl}')"` : ""}>${record.coverImageUrl ? "" : DISC_PLACEHOLDER}</div>
-        <button type="button" class="rm" data-id="${record.id}" aria-label="${escapeHtml(record.title)} löschen">×</button>
-        <div class="info">
-          <div class="title">${escapeHtml(record.title)}</div>
-          <div class="artist">${escapeHtml(record.artist)}${record.releaseYear ? ` · ${record.releaseYear}` : ""}</div>
-        </div>
-      `;
-      tile.addEventListener("click", e => {
-        if (e.target.closest("button")) return;
-        openDetail(record.id);
-      });
-      tile.addEventListener("keydown", e => {
-        if (e.target !== tile || (e.key !== "Enter" && e.key !== " ")) return;
-        e.preventDefault();
-        openDetail(record.id);
-      });
-      recordsGrid.appendChild(tile);
+  if (viewMode === "list") {
+    renderRecordsTable(sorted);
+    return;
+  }
+
+  sorted.forEach(record => {
+    const tile = document.createElement("div");
+    tile.className = "rec-tile";
+    tile.tabIndex = 0;
+    tile.setAttribute("role", "button");
+    tile.setAttribute("aria-label", `${record.artist} – ${record.title}`);
+    tile.innerHTML = `
+      <div class="cover${record.coverImageUrl ? " has-image" : ""}"${record.coverImageUrl ? ` style="background-image:url('${record.coverImageUrl}')"` : ""}>${record.coverImageUrl ? "" : DISC_PLACEHOLDER}</div>
+      <button type="button" class="rm" data-id="${record.id}" aria-label="${escapeHtml(record.title)} löschen">×</button>
+      <div class="info">
+        <div class="title">${escapeHtml(record.title)}</div>
+        <div class="artist">${escapeHtml(record.artist)}${record.releaseYear ? ` · ${record.releaseYear}` : ""}</div>
+      </div>
+    `;
+    tile.addEventListener("click", e => {
+      if (e.target.closest("button")) return;
+      openDetail(record.id);
     });
+    tile.addEventListener("keydown", e => {
+      if (e.target !== tile || (e.key !== "Enter" && e.key !== " ")) return;
+      e.preventDefault();
+      openDetail(record.id);
+    });
+    recordsGrid.appendChild(tile);
+  });
 
   recordsGrid.querySelectorAll(".rm").forEach(btn =>
     btn.addEventListener("click", e => {
@@ -437,6 +726,65 @@ function renderRecords() {
       requestDelete(btn.dataset.id);
     })
   );
+}
+
+const TABLE_COLUMNS = [
+  { key: "title", label: "Titel", cls: "col-title" },
+  { key: "artist", label: "Interpret", cls: "col-artist" },
+  { key: "releaseYear", label: "Jahr", cls: "col-num col-hide-sm" },
+  { key: "genre", label: "Genre", cls: "col-hide-md" },
+  { key: "condition", label: "Zustand", cls: "col-hide-sm" },
+  { key: "country", label: "Land", cls: "col-hide-md" },
+  { key: "lastKnownPrice", label: "Marktwert", cls: "col-num" },
+  { key: "purchasePrice", label: "Kaufpreis", cls: "col-num col-hide-sm" },
+];
+
+const TRASH_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/></svg>`;
+
+function conditionBadge(condition) {
+  if (!condition) return "";
+  const short = (condition.match(/\(([^)]+)\)/) || [])[1] || condition;
+  return `<span class="cond-badge" title="${escapeHtml(condition)}">${escapeHtml(short)}</span>`;
+}
+
+function renderRecordsTable(sorted) {
+  const head = TABLE_COLUMNS.map(c => {
+    const sort = c.key === sortKey ? ` aria-sort="${sortDir === 1 ? "ascending" : "descending"}"` : "";
+    return `<th scope="col" class="${c.cls}"${sort}><button type="button" class="sort-btn" data-sort="${c.key}">${c.label}</button></th>`;
+  }).join("");
+
+  const rows = sorted.map(r => `
+    <tr data-id="${r.id}" tabindex="0" aria-label="${escapeHtml(r.artist)} – ${escapeHtml(r.title)}">
+      <td class="col-art"><span class="row-art"${r.coverImageUrl ? ` style="background-image:url('${escapeHtml(r.coverImageUrl)}')"` : ""}></span></td>
+      <td class="col-title"><span class="cell-title">${escapeHtml(r.title)}</span><span class="cell-sub">${escapeHtml(r.artist)}</span></td>
+      <td class="col-artist">${escapeHtml(r.artist)}</td>
+      <td class="col-num col-hide-sm">${r.releaseYear ?? ""}</td>
+      <td class="col-hide-md">${escapeHtml(r.genre || "")}</td>
+      <td class="col-hide-sm">${conditionBadge(r.condition)}</td>
+      <td class="col-hide-md">${escapeHtml(r.country || "")}</td>
+      <td class="col-num col-value">${r.lastKnownPrice != null ? escapeHtml(formatMoney(r.lastKnownPrice, r.lastKnownPriceCurrency)) : `<span class="cell-empty">–</span>`}</td>
+      <td class="col-num col-hide-sm">${r.purchasePrice != null ? escapeHtml(formatMoney(r.purchasePrice, r.lastKnownPriceCurrency)) : `<span class="cell-empty">–</span>`}</td>
+      <td class="col-actions"><button type="button" class="row-rm" data-id="${r.id}" aria-label="${escapeHtml(r.title)} löschen">${TRASH_ICON}</button></td>
+    </tr>`).join("");
+
+  recordsTable.innerHTML = `
+    <table class="rec-table">
+      <thead><tr><th class="col-art"><span class="sr-only">Cover</span></th>${head}<th class="col-actions"><span class="sr-only">Aktionen</span></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function syncViewButtons() {
+  viewGridBtn.setAttribute("aria-pressed", String(viewMode === "grid"));
+  viewListBtn.setAttribute("aria-pressed", String(viewMode === "list"));
+}
+
+function setViewMode(mode) {
+  viewMode = mode;
+  localStorage.setItem("vinyl-view-mode", mode);
+  syncViewButtons();
+  renderRecords();
 }
 
 function closeDetail() {
@@ -447,6 +795,25 @@ function closeDetail() {
 function metaItem(label, value) {
   if (!value) return "";
   return `<span class="detail-chip"><span class="detail-chip-label">${escapeHtml(label)}</span>${escapeHtml(String(value))}</span>`;
+}
+
+function purchaseSection(record) {
+  if (record.purchasePrice == null && !record.purchaseDate && !record.purchaseSource) return "";
+  const currency = record.lastKnownPriceCurrency || "EUR";
+  const comparison = record.purchasePrice != null && record.lastKnownPrice != null
+    ? `<span class="detail-chip"><span class="detail-chip-label">Gegenüber Marktwert</span>${gainBadge(record.lastKnownPrice - record.purchasePrice, record.purchasePrice, currency)}</span>`
+    : "";
+  return `
+    <div class="detail-section">
+      <h4>Kauf</h4>
+      <div class="detail-chip-row purchase-row">
+        ${metaItem("Kaufpreis", record.purchasePrice != null ? formatMoney(record.purchasePrice, currency) : "")}
+        ${metaItem("Kaufdatum", record.purchaseDate ? formatDate(record.purchaseDate) : "")}
+        ${metaItem("Gekauft bei", record.purchaseSource)}
+        ${comparison}
+      </div>
+    </div>
+  `;
 }
 
 function openDetail(id) {
@@ -482,6 +849,7 @@ function openDetail(id) {
     <div class="detail-body">
       ${tracklistRows ? `<div class="detail-section"><h4>Tracklist</h4><div class="tracklist">${tracklistRows}</div></div>` : ""}
       ${record.notes ? `<div class="detail-section"><h4>Notizen</h4><p>${escapeHtml(record.notes)}</p></div>` : ""}
+      ${purchaseSection(record)}
     </div>
     <div class="detail-section detail-market" id="detail-market">
       <h4>Marktwert</h4>
@@ -524,7 +892,7 @@ async function loadMarketStats(releaseId) {
       return;
     }
     body.innerHTML = `
-      <span class="detail-market-value">ab ${stats.lowestPrice.toFixed(2)} ${escapeHtml(stats.currency || "")}</span><br>
+      <span class="detail-market-value">ab ${escapeHtml(formatMoney(stats.lowestPrice, stats.currency))}</span><br>
       ${stats.numForSale} Exemplar${stats.numForSale === 1 ? "" : "e"} aktuell im Discogs-Marktplatz
     `;
   } catch (err) {
@@ -574,7 +942,7 @@ function renderPriceChart(container, points) {
         <div class="price-bar-track">
           <div class="price-bar-fill" style="width: ${widthPct}%"></div>
         </div>
-        <span class="price-bar-value">${p.lowestPrice.toFixed(2)} ${escapeHtml(p.currency || "")}</span>
+        <span class="price-bar-value">${escapeHtml(formatMoney(p.lowestPrice, p.currency))}</span>
       </div>
     `;
   }).join("");
@@ -582,15 +950,15 @@ function renderPriceChart(container, points) {
   container.innerHTML = `
     <div class="price-stats">
       <div class="price-stat-card">
-        <span class="price-stat-value">${minPrice.toFixed(2)} ${escapeHtml(currency)}</span>
+        <span class="price-stat-value">${escapeHtml(formatMoney(minPrice, currency))}</span>
         <span class="price-stat-label">Min</span>
       </div>
       <div class="price-stat-card">
-        <span class="price-stat-value">${avgPrice.toFixed(2)} ${escapeHtml(currency)}</span>
+        <span class="price-stat-value">${escapeHtml(formatMoney(avgPrice, currency))}</span>
         <span class="price-stat-label">Durchschnitt</span>
       </div>
       <div class="price-stat-card">
-        <span class="price-stat-value">${maxPrice.toFixed(2)} ${escapeHtml(currency)}</span>
+        <span class="price-stat-value">${escapeHtml(formatMoney(maxPrice, currency))}</span>
         <span class="price-stat-label">Max</span>
       </div>
     </div>
@@ -701,6 +1069,10 @@ function startEdit(id) {
   catalogNumberField.value = record.catalogNumber || "";
   coverImageUrlField.value = record.coverImageUrl || "";
   tracklistField.value = record.tracklist || "";
+  purchasePriceField.value = record.purchasePrice ?? "";
+  purchaseDateField.value = record.purchaseDate || "";
+  purchaseSourceField.value = record.purchaseSource || "";
+  duplicateHint.hidden = true;
   submitBtn.textContent = "Speichern";
   artistField.focus();
 }
@@ -711,6 +1083,7 @@ function resetForm() {
   barcodeField.value = "";
   discogsReleaseIdField.value = "";
   submitBtn.textContent = "Hinzufügen";
+  duplicateHint.hidden = true;
   form.hidden = true;
   formCard.hidden = true;
 }
@@ -744,8 +1117,9 @@ function closeConfirm() {
   confirmModal.hidden = true;
 }
 
-function showToast(message) {
+function showToast(message, kind = "success") {
   toastEl.textContent = message;
+  toastEl.dataset.kind = kind;
   toastEl.hidden = false;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => (toastEl.hidden = true), 2200);
@@ -855,7 +1229,8 @@ async function lookupBarcode(code) {
       resetForm();
       openForm();
       barcodeField.value = code;
-      showToast("Kein Discogs-Treffer gefunden – bitte manuell eingeben");
+      showDuplicateHint(null, code);
+      showToast("Kein Discogs-Treffer gefunden – bitte manuell eingeben", "info");
       return;
     }
 
@@ -864,17 +1239,48 @@ async function lookupBarcode(code) {
       return;
     }
 
-    showResultPicker(results, code);
+    await showResultPicker(results, code);
   } catch (err) {
     await closeScanModal();
     resetForm();
     openForm();
     barcodeField.value = code;
-    showToast("Discogs nicht erreichbar – bitte manuell eingeben");
+    showDuplicateHint(null, code);
+    showToast("Discogs nicht erreichbar – bitte manuell eingeben", "error");
   }
 }
 
-function showResultPicker(results, code) {
+// Discogs titles read "Artist - Album"; show the album first, the artist under it,
+// then the pressing details people use to tell releases apart.
+function releasePreview(r, owned) {
+  const split = (r.title || "").indexOf(" - ");
+  const artist = split > 0 ? r.title.slice(0, split) : "";
+  const album = split > 0 ? r.title.slice(split + 3) : (r.title || "");
+  const formats = [...new Set((r.formats || []).filter(f => f && f !== "Vinyl"))].slice(0, 3);
+  const isVinyl = !r.formats || r.formats.length === 0 || r.formats.includes("Vinyl");
+  const meta = [
+    r.year,
+    r.country,
+    isVinyl ? formats.join(", ") : (r.formats || []).slice(0, 3).join(", "),
+    r.labels && r.labels[0],
+    r.catalogNumber
+  ].filter(Boolean).map(v => escapeHtml(String(v))).join(" · ");
+  const thumb = r.thumb && !r.thumb.includes("spacer.gif") ? r.thumb : "";
+  return `
+    <span class="rp-art${isVinyl ? "" : " no-disc"}" aria-hidden="true">
+      <span class="rp-disc"></span>
+      <span class="rp-cover"${thumb ? ` style="background-image:url('${escapeHtml(thumb)}')"` : ""}></span>
+    </span>
+    <span class="rp-text">
+      <span class="rp-title">${escapeHtml(album)}</span>
+      ${artist ? `<span class="rp-artist">${escapeHtml(artist)}</span>` : ""}
+      ${meta ? `<span class="rp-meta">${meta}</span>` : ""}
+    </span>
+    ${ownedBadge(findOwned(owned, r.id, null))}`;
+}
+
+async function showResultPicker(results, code) {
+  const owned = await getOwnedRecords();
   scanStatus.textContent = "Mehrere Treffer gefunden – bitte auswählen:";
   scanResults.hidden = false;
   scanResults.innerHTML = "";
@@ -883,12 +1289,7 @@ function showResultPicker(results, code) {
     btn.type = "button";
     btn.className = "scan-result-item";
     btn.innerHTML = `
-      <img src="${r.thumb || ""}" alt="">
-      <span>
-        <span class="scan-result-title">${escapeHtml(r.title)}</span><br>
-        <span class="scan-result-year">${r.year || ""}${r.catalogNumber ? ` - ${escapeHtml(r.catalogNumber)}` : ""}</span>
-      </span>
-    `;
+      ${releasePreview(r, owned)}`;
     btn.addEventListener("click", () => applyRelease(r.id, code));
     scanResults.appendChild(btn);
   });
@@ -905,6 +1306,7 @@ async function applyRelease(releaseId, code) {
     barcodeField.value = code;
     discogsReleaseIdField.value = releaseId;
     fillFormFromRelease(release);
+    showDuplicateHint(releaseId, code);
     showToast("Daten von Discogs geladen – bitte prüfen und ergänzen");
     artistField.focus();
   } catch (err) {
@@ -912,38 +1314,77 @@ async function applyRelease(releaseId, code) {
     resetForm();
     openForm();
     barcodeField.value = code;
-    showToast("Discogs-Daten konnten nicht geladen werden – bitte manuell eingeben");
+    showDuplicateHint(null, code);
+    showToast("Discogs-Daten konnten nicht geladen werden – bitte manuell eingeben", "error");
   }
 }
 
+// Live search: wait for a short typing pause, reuse answers for queries already asked,
+// and drop responses that arrive after the query has moved on.
+const LIVE_SEARCH_DELAY = 400;
+const LIVE_SEARCH_MIN_CHARS = 3;
+const searchCache = new Map();
+let searchTimer = null;
+let searchSeq = 0;
+
+async function searchDiscogs(query) {
+  const key = query.toLowerCase();
+  if (searchCache.has(key)) return searchCache.get(key);
+  const res = await fetch(`/api/discogs/search-text?q=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error("Discogs-Suche fehlgeschlagen");
+  const results = await res.json();
+  searchCache.set(key, results);
+  return results;
+}
+
+function scheduleManualSearch() {
+  clearTimeout(searchTimer);
+  const query = manualSearchInput.value.trim();
+  if (query.length < LIVE_SEARCH_MIN_CHARS) {
+    searchSeq++;
+    closeManualSearchResults();
+    return;
+  }
+  searchTimer = setTimeout(submitManualSearch, LIVE_SEARCH_DELAY);
+}
+
 async function submitManualSearch() {
+  clearTimeout(searchTimer);
   const query = manualSearchInput.value.trim();
   if (!query) return;
+  const seq = ++searchSeq;
 
-  manualSearchStatus.hidden = false;
-  manualSearchStatus.textContent = "Suche läuft…";
-  manualSearchResults.innerHTML = "";
+  // keep the previous results visible while the next ones load, so typing doesn't flicker
+  if (!manualSearchResults.children.length) {
+    manualSearchStatus.hidden = false;
+    manualSearchStatus.textContent = "Suche läuft…";
+  }
 
   try {
-    const res = await fetch(`/api/discogs/search-text?q=${encodeURIComponent(query)}`);
-    if (!res.ok) throw new Error("Discogs-Suche fehlgeschlagen");
-    const results = await res.json();
+    const results = await searchDiscogs(query);
+    if (seq !== searchSeq) return;
+    manualSearchResults.innerHTML = "";
 
     if (results.length === 0) {
+      manualSearchStatus.hidden = false;
       manualSearchStatus.textContent = "Keine Treffer gefunden.";
       return;
     }
 
+    const owned = await getOwnedRecords();
+    if (seq !== searchSeq) return;
     manualSearchStatus.hidden = true;
     results.slice(0, 8).forEach(r => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "suggestion";
-      btn.innerHTML = `${escapeHtml(r.title)}${r.year ? ` <span class="dim">${r.year}</span>` : ""}`;
+      btn.innerHTML = releasePreview(r, owned);
       btn.addEventListener("click", () => applyManualSearchResult(r.id));
       manualSearchResults.appendChild(btn);
     });
   } catch (err) {
+    if (seq !== searchSeq) return;
+    manualSearchResults.innerHTML = "";
     manualSearchStatus.hidden = false;
     manualSearchStatus.textContent = "Discogs nicht erreichbar.";
   }
@@ -959,10 +1400,11 @@ async function applyManualSearchResult(releaseId) {
     openForm();
     discogsReleaseIdField.value = releaseId;
     fillFormFromRelease(release);
+    showDuplicateHint(releaseId, null);
     showToast("Daten von Discogs geladen – bitte prüfen und ergänzen");
     artistField.focus();
   } catch (err) {
-    showToast("Discogs-Daten konnten nicht geladen werden");
+    showToast("Discogs-Daten konnten nicht geladen werden", "error");
   }
 }
 
@@ -1012,6 +1454,10 @@ manualSearchInput.addEventListener("keydown", e => {
     submitManualSearch();
   }
 });
+manualSearchInput.addEventListener("input", scheduleManualSearch);
+manualSearchInput.addEventListener("focus", () => {
+  if (!manualSearchResults.children.length) scheduleManualSearch();
+});
 
 backToDashboardBtn.addEventListener("click", e => {
   e.preventDefault();
@@ -1054,6 +1500,9 @@ form.addEventListener("submit", async e => {
     discogsReleaseId: discogsReleaseIdField.value ? parseInt(discogsReleaseIdField.value, 10) : null,
     label: labelField.value.trim() || null,
     catalogNumber: catalogNumberField.value.trim() || null,
+    purchasePrice: purchasePriceField.value ? parseFloat(purchasePriceField.value) : null,
+    purchaseDate: purchaseDateField.value || null,
+    purchaseSource: purchaseSourceField.value.trim() || null,
   };
 
   const id = idField.value;
@@ -1097,7 +1546,7 @@ function renderWishlistGrid() {
       <div class="info">
         <div class="title">${escapeHtml(item.title)}</div>
         <div class="artist">${escapeHtml(item.artist)}</div>
-        ${item.lastKnownPrice != null ? `<div class="price">ab ${item.lastKnownPrice.toFixed(2)} ${escapeHtml(item.lastKnownPriceCurrency || "")}</div>` : ""}
+        ${item.lastKnownPrice != null ? `<div class="price">ab ${escapeHtml(formatMoney(item.lastKnownPrice, item.lastKnownPriceCurrency))}</div>` : ""}
       </div>
       <button type="button" class="add" data-id="${item.id}">In Sammlung</button>
       <button type="button" class="rm" data-id="${item.id}" aria-label="${escapeHtml(item.title)} von der Wunschliste entfernen">Entfernen</button>
@@ -1127,7 +1576,7 @@ function openPromoteModal(id) {
   promotingWishlistItemId = id;
   const targetable = collections.filter(c => c.deletable);
   if (targetable.length === 0) {
-    showToast("Lege zuerst eine Sammlung an");
+    showToast("Lege zuerst eine Sammlung an", "info");
     return;
   }
   promoteSelect.innerHTML = "";
@@ -1189,28 +1638,52 @@ function openWishlistSearchModal() {
 }
 
 function closeWishlistSearchModal() {
+  clearTimeout(wishlistSearchTimer);
+  wishlistSearchSeq++;
   wishlistSearchModal.hidden = true;
 }
 
+let wishlistSearchTimer = null;
+let wishlistSearchSeq = 0;
+
+function scheduleWishlistSearch() {
+  clearTimeout(wishlistSearchTimer);
+  if (wishlistSearchInput.value.trim().length < LIVE_SEARCH_MIN_CHARS) {
+    wishlistSearchSeq++;
+    wishlistSearchStatus.hidden = true;
+    wishlistSearchResults.hidden = true;
+    wishlistSearchResults.innerHTML = "";
+    return;
+  }
+  wishlistSearchTimer = setTimeout(submitWishlistSearch, LIVE_SEARCH_DELAY);
+}
+
 async function submitWishlistSearch() {
+  clearTimeout(wishlistSearchTimer);
   const query = wishlistSearchInput.value.trim();
   if (!query) return;
+  const seq = ++wishlistSearchSeq;
 
-  wishlistSearchStatus.hidden = false;
-  wishlistSearchStatus.textContent = "Suche läuft…";
-  wishlistSearchResults.hidden = true;
-  wishlistSearchResults.innerHTML = "";
+  if (wishlistSearchResults.hidden) {
+    wishlistSearchStatus.hidden = false;
+    wishlistSearchStatus.textContent = "Suche läuft…";
+  }
 
   try {
-    const res = await fetch(`/api/discogs/search-text?q=${encodeURIComponent(query)}`);
-    if (!res.ok) throw new Error("Discogs-Suche fehlgeschlagen");
-    const results = await res.json();
+    const results = await searchDiscogs(query);
+    if (seq !== wishlistSearchSeq) return;
 
     if (results.length === 0) {
+      wishlistSearchResults.hidden = true;
+      wishlistSearchResults.innerHTML = "";
+      wishlistSearchStatus.hidden = false;
       wishlistSearchStatus.textContent = "Keine Treffer gefunden.";
       return;
     }
 
+    const owned = await getOwnedRecords();
+    if (seq !== wishlistSearchSeq) return;
+    wishlistSearchResults.innerHTML = "";
     wishlistSearchStatus.hidden = true;
     wishlistSearchResults.hidden = false;
     results.slice(0, 25).forEach(r => {
@@ -1218,16 +1691,14 @@ async function submitWishlistSearch() {
       btn.type = "button";
       btn.className = "scan-result-item";
       btn.innerHTML = `
-        <img src="${r.thumb || ""}" alt="">
-        <span>
-          <span class="scan-result-title">${escapeHtml(r.title)}</span><br>
-          <span class="scan-result-year">${r.year || ""}${r.catalogNumber ? ` - ${escapeHtml(r.catalogNumber)}` : ""}</span>
-        </span>
-      `;
+        ${releasePreview(r, owned)}`;
       btn.addEventListener("click", () => addToWishlist(r.id));
       wishlistSearchResults.appendChild(btn);
     });
   } catch (err) {
+    if (seq !== wishlistSearchSeq) return;
+    wishlistSearchResults.hidden = true;
+    wishlistSearchResults.innerHTML = "";
     wishlistSearchStatus.hidden = false;
     wishlistSearchStatus.textContent = "Discogs nicht erreichbar – bitte später erneut versuchen.";
   }
@@ -1237,7 +1708,7 @@ async function addToWishlist(releaseId) {
   try {
     const res = await fetch(`/api/wishlist/${releaseId}`, { method: "POST" });
     if (res.status === 409) {
-      showToast("Bereits auf der Wunschliste");
+      showToast("Bereits auf der Wunschliste", "info");
       closeWishlistSearchModal();
       return;
     }
@@ -1246,7 +1717,7 @@ async function addToWishlist(releaseId) {
     await loadWishlist();
     showToast("Zur Wunschliste hinzugefügt");
   } catch (err) {
-    showToast("Konnte nicht hinzugefügt werden");
+    showToast("Konnte nicht hinzugefügt werden", "error");
   }
 }
 
@@ -1262,12 +1733,14 @@ wishlistSearchInput.addEventListener("keydown", e => {
     submitWishlistSearch();
   }
 });
+wishlistSearchInput.addEventListener("input", scheduleWishlistSearch);
 
 cancelBtn.addEventListener("click", resetForm);
 searchField.addEventListener("input", renderRecords);
 
 filterToggleBtn.addEventListener("click", () => {
   filterPanel.hidden = !filterPanel.hidden;
+  filterToggleBtn.setAttribute("aria-expanded", String(!filterPanel.hidden));
 });
 [filterGenre, filterFormat, filterCondition, filterCountry, filterYearFrom, filterYearTo].forEach(field =>
   field.addEventListener("input", renderRecords)
@@ -1294,9 +1767,26 @@ menuBtn.addEventListener("click", () => {
   const open = appShell.classList.toggle("menu-open");
   menuBtn.setAttribute("aria-expanded", String(open));
 });
+// Klick auf die abgedunkelte Fläche neben der mobilen Seitenleiste schließt sie
+appShell.addEventListener("click", e => {
+  if (e.target === appShell && appShell.classList.contains("menu-open")) closeMenu();
+});
+
+// Escape schließt den obersten offenen Dialog bzw. die mobile Seitenleiste
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!confirmModal.hidden) closeConfirm();
+  else if (!detailModal.hidden) closeDetail();
+  else if (!scanModal.hidden) closeScanModal();
+  else if (!wishlistSearchModal.hidden) closeWishlistSearchModal();
+  else if (!promoteModal.hidden) closePromoteModal();
+  else if (!collectionModal.hidden) closeCollectionModal();
+  else if (appShell.classList.contains("menu-open")) closeMenu();
+});
 
 // Discogs-Trefferliste im Kopf schließen, sobald außerhalb geklickt oder Escape gedrückt wird
 function closeManualSearchResults() {
+  clearTimeout(searchTimer);
   manualSearchResults.innerHTML = "";
   manualSearchStatus.hidden = true;
 }
@@ -1307,5 +1797,36 @@ manualSearchInput.addEventListener("keydown", e => {
   if (e.key === "Escape") closeManualSearchResults();
 });
 
+viewGridBtn.addEventListener("click", () => setViewMode("grid"));
+viewListBtn.addEventListener("click", () => setViewMode("list"));
+refreshPricesBtns.forEach(btn => btn.addEventListener("click", startPriceRefresh));
+
+recordsTable.addEventListener("click", e => {
+  const sortBtn = e.target.closest(".sort-btn");
+  if (sortBtn) {
+    const key = sortBtn.dataset.sort;
+    sortDir = key === sortKey ? -sortDir : 1;
+    sortKey = key;
+    renderRecords();
+    recordsTable.querySelector(`.sort-btn[data-sort="${key}"]`).focus();
+    return;
+  }
+  const removeBtn = e.target.closest(".row-rm");
+  if (removeBtn) {
+    requestDelete(removeBtn.dataset.id);
+    return;
+  }
+  const row = e.target.closest("tr[data-id]");
+  if (row) openDetail(row.dataset.id);
+});
+recordsTable.addEventListener("keydown", e => {
+  const row = e.target.closest("tr[data-id]");
+  if (!row || e.target !== row || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  openDetail(row.dataset.id);
+});
+
+syncViewButtons();
 loadCollections();
 loadWishlist();
+resumePriceRefresh();

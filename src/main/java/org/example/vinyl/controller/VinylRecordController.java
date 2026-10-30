@@ -1,10 +1,12 @@
 package org.example.vinyl.controller;
 
+import org.example.vinyl.PriceTrackingService;
 import org.example.vinyl.discogs.DiscogsService;
 import org.example.vinyl.discogs.DiscogsUnavailableException;
 import org.example.vinyl.discogs.dto.DiscogsMarketStats;
 import org.example.vinyl.model.VinylCollection;
 import org.example.vinyl.model.VinylRecord;
+import org.example.vinyl.repository.PriceSnapshotRepository;
 import org.example.vinyl.repository.VinylCollectionRepository;
 import org.example.vinyl.repository.VinylRecordRepository;
 import org.springframework.http.HttpStatus;
@@ -21,12 +23,17 @@ public class VinylRecordController {
     private final VinylRecordRepository repository;
     private final VinylCollectionRepository collectionRepository;
     private final DiscogsService discogsService;
+    private final PriceTrackingService priceTrackingService;
+    private final PriceSnapshotRepository snapshotRepository;
 
     public VinylRecordController(VinylRecordRepository repository, VinylCollectionRepository collectionRepository,
-                                  DiscogsService discogsService) {
+                                  DiscogsService discogsService, PriceTrackingService priceTrackingService,
+                                  PriceSnapshotRepository snapshotRepository) {
         this.repository = repository;
         this.collectionRepository = collectionRepository;
         this.discogsService = discogsService;
+        this.priceTrackingService = priceTrackingService;
+        this.snapshotRepository = snapshotRepository;
     }
 
     @GetMapping
@@ -40,7 +47,9 @@ public class VinylRecordController {
         record.getCollections().clear();
         record.getCollections().addAll(targetCollections(collectionId));
         fetchLatestPrice(record);
-        return repository.save(record);
+        VinylRecord saved = repository.save(record);
+        priceTrackingService.recordSnapshot(saved);
+        return saved;
     }
 
     @PutMapping("/{id}")
@@ -49,7 +58,9 @@ public class VinylRecordController {
         record.getCollections().clear();
         record.getCollections().addAll(targetCollections(collectionId));
         fetchLatestPrice(record);
-        return repository.save(record);
+        VinylRecord saved = repository.save(record);
+        priceTrackingService.recordSnapshot(saved);
+        return saved;
     }
 
     private void fetchLatestPrice(VinylRecord record) {
@@ -70,6 +81,7 @@ public class VinylRecordController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long collectionId, @PathVariable Long id) {
         repository.deleteById(id);
+        snapshotRepository.deleteByRecordId(id);
     }
 
     @DeleteMapping
@@ -77,6 +89,7 @@ public class VinylRecordController {
         VinylCollection collection = requireCollection(collectionId);
         if (collection.isGeneral()) {
             repository.deleteAll();
+            snapshotRepository.deleteAll();
             return;
         }
 

@@ -11,6 +11,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,6 +40,9 @@ public class VinylRecord {
     private String catalogNumber;
     private Double lastKnownPrice;
     private String lastKnownPriceCurrency;
+    private Double purchasePrice;
+    private LocalDate purchaseDate;
+    private String purchaseSource;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "record_collection",
@@ -192,6 +196,30 @@ public class VinylRecord {
 
     public void setLastKnownPriceCurrency(String lastKnownPriceCurrency) {
         this.lastKnownPriceCurrency = lastKnownPriceCurrency;
+    }
+
+    public Double getPurchasePrice() {
+        return purchasePrice;
+    }
+
+    public void setPurchasePrice(Double purchasePrice) {
+        this.purchasePrice = purchasePrice;
+    }
+
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
+
+    public String getPurchaseSource() {
+        return purchaseSource;
+    }
+
+    public void setPurchaseSource(String purchaseSource) {
+        this.purchaseSource = purchaseSource;
     }
 
     public Set<VinylCollection> getCollections() {
