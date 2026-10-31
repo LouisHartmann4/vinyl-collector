@@ -13,17 +13,23 @@ import java.util.List;
 public class AppUserPrincipal implements UserDetails, Serializable {
 
     private final Long id;
+    private final String publicId;
     private final String username;
     private final String passwordHash;
 
     public AppUserPrincipal(AppUser user) {
         this.id = user.getId();
+        this.publicId = user.getPublicId();
         this.username = user.getUsername();
         this.passwordHash = user.getPasswordHash();
     }
 
     public Long getId() {
         return id;
+    }
+
+    public String getPublicId() {
+        return publicId;
     }
 
     @Override

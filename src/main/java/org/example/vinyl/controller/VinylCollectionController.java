@@ -1,5 +1,6 @@
 package org.example.vinyl.controller;
 
+import jakarta.validation.Valid;
 import org.example.vinyl.model.VinylCollection;
 import org.example.vinyl.model.VinylRecord;
 import org.example.vinyl.repository.VinylCollectionRepository;
@@ -37,7 +38,7 @@ public class VinylCollectionController {
     }
 
     @PostMapping
-    public VinylCollection create(@RequestBody VinylCollection collection) {
+    public VinylCollection create(@Valid @RequestBody VinylCollection collection) {
         collection.setId(null);
         collection.setGeneral(false);
         collection.setOwnerId(currentUser.id());

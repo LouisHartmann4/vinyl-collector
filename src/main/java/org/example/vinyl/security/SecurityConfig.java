@@ -18,11 +18,15 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -33,6 +37,21 @@ import java.io.IOException;
 public class SecurityConfig {
 
     static final String LOGIN_URL = "/api/auth/login";
+
+    // style-src braucht 'unsafe-inline' für die Cover als background-image und den Scanner;
+    // Skripte bleiben streng: kein Inline-Code, kein eval
+    private static final String CONTENT_SECURITY_POLICY = String.join("; ",
+            "default-src 'self'",
+            "script-src 'self' https://unpkg.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            "font-src https://fonts.gstatic.com",
+            "img-src 'self' https: data: blob:",
+            "media-src 'self' blob:",
+            "connect-src 'self'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'none'");
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -60,6 +79,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
+                // Zweite Verteidigungslinie gegen XSS: der Browser führt nur Skripte von hier und dem
+                // Barcode-Scanner (unpkg, per Integritäts-Hash) aus, nie eingeschleusten Inline-Code
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(CONTENT_SECURITY_POLICY))
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN))
+                        .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy",
+                                "camera=(self), microphone=(), geolocation=(), payment=()")))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(new LoginLockFilter(attempts), UsernamePasswordAuthenticationFilter.class)
                 .formLogin(form -> form
@@ -80,10 +106,19 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpStatus.NO_CONTENT.value())))
-                // API-Aufrufe ohne Anmeldung bekommen 401 statt einer Weiterleitung auf die Login-Seite
-                .exceptionHandling(ex -> ex.defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), api));
+                // API-Aufrufe ohne Anmeldung bekommen 401; Seiten zeigen die Anmeldung unter derselben
+                // Adresse (Forward statt Weiterleitung), damit kein /login.html in der Adresszeile steht
+                .exceptionHandling(ex -> ex
+                        .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), api)
+                        .defaultAuthenticationEntryPointFor(loginForward(), AnyRequestMatcher.INSTANCE));
 
         return http.build();
+    }
+
+    private static LoginUrlAuthenticationEntryPoint loginForward() {
+        LoginUrlAuthenticationEntryPoint entryPoint = new LoginUrlAuthenticationEntryPoint("/login.html");
+        entryPoint.setUseForward(true);
+        return entryPoint;
     }
 
     private static String lockedOrWrong(long lockedSeconds) {

@@ -15,7 +15,7 @@ window.fetch = async (input, init = {}) => {
   }
   const res = await nativeFetch(input, init);
   if (res.status === 401) {
-    location.replace("/login.html");
+    location.replace("/");
   }
   return res;
 };
@@ -249,13 +249,13 @@ async function loadCollectionCover(collectionId) {
   try {
     const res = await fetch(`/api/collections/${collectionId}/records`);
     const items = await res.json();
-    const covers = items.map(r => r.coverImageUrl).filter(Boolean).slice(0, 4);
+    const covers = items.map(r => safeImageUrl(r.coverImageUrl)).filter(Boolean).slice(0, 4);
     if (covers.length === 0) return;
 
     coverEl.classList.add("has-covers");
     coverEl.innerHTML = Array.from({ length: 4 }, (_, i) =>
       covers[i]
-        ? `<div class="cover-quad" style="background-image:url('${covers[i]}')"></div>`
+        ? `<div class="cover-quad"${backgroundStyle(covers[i])}></div>`
         : `<div class="cover-quad empty"></div>`
     ).join("");
   } catch (err) {
@@ -355,6 +355,10 @@ async function submitNewCollection() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
   });
+  if (!res.ok) {
+    showToast(await readApiError(res, "Sammlung konnte nicht erstellt werden"), "error");
+    return;
+  }
   const created = await res.json();
   closeCollectionModal();
   await loadCollections();
@@ -725,7 +729,7 @@ function renderRecords() {
     tile.setAttribute("role", "button");
     tile.setAttribute("aria-label", `${record.artist} – ${record.title}`);
     tile.innerHTML = `
-      <div class="cover${record.coverImageUrl ? " has-image" : ""}"${record.coverImageUrl ? ` style="background-image:url('${record.coverImageUrl}')"` : ""}>${record.coverImageUrl ? "" : DISC_PLACEHOLDER}</div>
+      <div class="cover${safeImageUrl(record.coverImageUrl) ? " has-image" : ""}"${backgroundStyle(record.coverImageUrl)}>${safeImageUrl(record.coverImageUrl) ? "" : DISC_PLACEHOLDER}</div>
       <button type="button" class="rm" data-id="${record.id}" aria-label="${escapeHtml(record.title)} löschen">×</button>
       <div class="info">
         <div class="title">${escapeHtml(record.title)}</div>
@@ -779,7 +783,7 @@ function renderRecordsTable(sorted) {
 
   const rows = sorted.map(r => `
     <tr data-id="${r.id}" tabindex="0" aria-label="${escapeHtml(r.artist)} – ${escapeHtml(r.title)}">
-      <td class="col-art"><span class="row-art"${r.coverImageUrl ? ` style="background-image:url('${escapeHtml(r.coverImageUrl)}')"` : ""}></span></td>
+      <td class="col-art"><span class="row-art"${backgroundStyle(r.coverImageUrl)}></span></td>
       <td class="col-title"><span class="cell-title">${escapeHtml(r.title)}</span><span class="cell-sub">${escapeHtml(r.artist)}</span></td>
       <td class="col-artist">${escapeHtml(r.artist)}</td>
       <td class="col-num col-hide-sm">${r.releaseYear ?? ""}</td>
@@ -862,7 +866,7 @@ function openDetail(id) {
 
   detailContent.innerHTML = `
     <div class="detail-header">
-      ${record.coverImageUrl ? `<img class="detail-cover" src="${record.coverImageUrl}" alt="Cover von ${escapeHtml(record.title)}" loading="lazy">` : `<div class="detail-cover detail-cover-placeholder">${DISC_PLACEHOLDER}</div>`}
+      ${safeImageUrl(record.coverImageUrl) ? `<img class="detail-cover" src="${escapeHtml(safeImageUrl(record.coverImageUrl))}" alt="Cover von ${escapeHtml(record.title)}" loading="lazy">` : `<div class="detail-cover detail-cover-placeholder">${DISC_PLACEHOLDER}</div>`}
       <div class="detail-header-text">
         <div class="kicker">${escapeHtml(record.genre || "Sonstiges")}${record.releaseYear ? ` · ${record.releaseYear}` : ""}</div>
         <h3 class="detail-title">${escapeHtml(record.title)}</h3>
@@ -1045,10 +1049,38 @@ function truncateLabel(label) {
   return label.length > 12 ? label.slice(0, 11) + "…" : label;
 }
 
+// Maskiert alles, was in HTML-Text oder einem Attribut in "…" oder '…' ausbrechen könnte
 function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str ?? "";
-  return div.innerHTML;
+  return String(str ?? "").replace(/[&<>"'`]/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "`": "&#96;"
+  })[ch]);
+}
+
+// Nur https-Adressen; alles andere (javascript:, data:, kaputte URLs) wird verworfen
+function safeImageUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" ? parsed.href : "";
+  } catch (err) {
+    return "";
+  }
+}
+
+// style-Attribut für ein Hintergrundbild, sicher gegen Ausbruch aus url(...) und dem Attribut
+function backgroundStyle(url) {
+  const safe = safeImageUrl(url);
+  if (!safe) return "";
+  const cssSafe = safe.replace(/['"()\\\s]/g, ch => "%" + ch.charCodeAt(0).toString(16).padStart(2, "0"));
+  return ` style="background-image:url('${escapeHtml(cssSafe)}')"`;
+}
+
+async function readApiError(res, fallback) {
+  try {
+    const body = await res.json();
+    return body.error || fallback;
+  } catch (err) {
+    return fallback;
+  }
 }
 
 function fillFormFromRelease(release) {
@@ -1293,7 +1325,7 @@ function releasePreview(r, owned) {
   return `
     <span class="rp-art${isVinyl ? "" : " no-disc"}" aria-hidden="true">
       <span class="rp-disc"></span>
-      <span class="rp-cover"${thumb ? ` style="background-image:url('${escapeHtml(thumb)}')"` : ""}></span>
+      <span class="rp-cover"${backgroundStyle(thumb)}></span>
     </span>
     <span class="rp-text">
       <span class="rp-title">${escapeHtml(album)}</span>
@@ -1535,11 +1567,16 @@ form.addEventListener("submit", async e => {
   const url = id ? `${targetApiUrl}/${id}` : targetApiUrl;
   const method = id ? "PUT" : "POST";
 
-  await fetch(url, {
+  const res = await fetch(url, {
     method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+  if (!res.ok) {
+    // Eingaben bleiben stehen, damit man sie korrigieren kann
+    showToast(await readApiError(res, "Platte konnte nicht gespeichert werden"), "error");
+    return;
+  }
 
   const wasEdit = !!id;
   resetForm();
@@ -1566,7 +1603,7 @@ function renderWishlistGrid() {
     const card = document.createElement("div");
     card.className = "wish";
     card.innerHTML = `
-      <div class="art${item.coverImageUrl ? " has-image" : ""}"${item.coverImageUrl ? ` style="background-image:url('${item.coverImageUrl}')"` : ""}></div>
+      <div class="art${safeImageUrl(item.coverImageUrl) ? " has-image" : ""}"${backgroundStyle(item.coverImageUrl)}></div>
       <div class="info">
         <div class="title">${escapeHtml(item.title)}</div>
         <div class="artist">${escapeHtml(item.artist)}</div>
@@ -1854,7 +1891,7 @@ async function loadAccount() {
   try {
     const me = await (await fetch("/api/auth/me")).json();
     if (!me.authenticated) {
-      location.replace("/login.html");
+      location.replace("/");
       return;
     }
     document.getElementById("account-name").textContent = me.username;
@@ -1868,7 +1905,7 @@ document.getElementById("logout-btn").addEventListener("click", async () => {
   try {
     await fetch("/api/auth/logout", { method: "POST" });
   } finally {
-    location.replace("/login.html");
+    location.replace("/");
   }
 });
 

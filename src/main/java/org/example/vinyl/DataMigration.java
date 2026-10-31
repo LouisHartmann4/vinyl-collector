@@ -36,8 +36,14 @@ public class DataMigration implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        assignUserIds();
         assignOrphanRecords();
         backfillMissingPrices();
+    }
+
+    private void assignUserIds() {
+        List<AppUser> withoutId = userRepository.findAll().stream().filter(AppUser::ensurePublicId).toList();
+        userRepository.saveAll(withoutId);
     }
 
     private void assignOrphanRecords() {

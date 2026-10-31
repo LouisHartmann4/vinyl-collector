@@ -1,5 +1,6 @@
 package org.example.vinyl.controller;
 
+import jakarta.validation.Valid;
 import org.example.vinyl.AccountService;
 import org.example.vinyl.PriceTrackingService;
 import org.example.vinyl.discogs.DiscogsService;
@@ -49,7 +50,7 @@ public class VinylRecordController {
     }
 
     @PostMapping
-    public VinylRecord create(@PathVariable Long collectionId, @RequestBody VinylRecord record) {
+    public VinylRecord create(@PathVariable Long collectionId, @Valid @RequestBody VinylRecord record) {
         record.setId(null);
         record.setOwnerId(currentUser.id());
         record.getCollections().clear();
@@ -61,7 +62,7 @@ public class VinylRecordController {
     }
 
     @PutMapping("/{id}")
-    public VinylRecord update(@PathVariable Long collectionId, @PathVariable Long id, @RequestBody VinylRecord record) {
+    public VinylRecord update(@PathVariable Long collectionId, @PathVariable Long id, @Valid @RequestBody VinylRecord record) {
         requireRecord(id);
         record.setId(id);
         record.setOwnerId(currentUser.id());

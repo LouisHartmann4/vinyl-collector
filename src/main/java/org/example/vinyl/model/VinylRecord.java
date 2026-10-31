@@ -10,6 +10,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -22,26 +30,45 @@ public class VinylRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank @Size(max = 255) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String artist;
+    @NotBlank @Size(max = 255) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String title;
+    @Size(max = 255) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String genre;
+    @Min(1850) @Max(2100)
     private Integer releaseYear;
+    @Size(max = 255) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String format;
+    @Size(max = 255) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String condition;
+    @Size(max = 255) @Pattern(regexp = InputRules.MULTI_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String notes;
+    @Size(max = 64) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String barcode;
+    @Size(max = 255) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String styles;
+    @Size(max = 255) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String country;
     @Lob
+    @Size(max = 20000) @Pattern(regexp = InputRules.MULTI_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String tracklist;
+    @Size(max = 255) @Pattern(regexp = InputRules.WEB_URL, message = InputRules.WEB_URL_MESSAGE)
     private String coverImageUrl;
+    @Positive
     private Long discogsReleaseId;
+    @Size(max = 255) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String label;
+    @Size(max = 255) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String catalogNumber;
+    @PositiveOrZero @DecimalMax("10000000")
     private Double lastKnownPrice;
+    @Pattern(regexp = "[A-Z]{3}", message = "muss ein Währungskürzel wie EUR sein")
     private String lastKnownPriceCurrency;
+    @PositiveOrZero @DecimalMax("10000000")
     private Double purchasePrice;
     private LocalDate purchaseDate;
+    @Size(max = 255) @Pattern(regexp = InputRules.SINGLE_LINE, message = InputRules.SINGLE_LINE_MESSAGE)
     private String purchaseSource;
 
     // Konto, dem der Eintrag gehört; wird nur serverseitig gesetzt
